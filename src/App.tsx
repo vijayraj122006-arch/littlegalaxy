@@ -1,0 +1,247 @@
+import React, { useEffect, useState, Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { useUniverse } from './store/useUniverse';
+import { MEMORIES } from './content/memories';
+import { PLANETS } from './content/planets';
+import { FINALE_CONTENT } from './content/finale';
+import { isWebGLAvailable, getDeviceDpr } from './utils/device';
+
+// 3D Scene Components
+import { Galaxy } from './scene/Galaxy';
+import { Starfield } from './scene/Starfield';
+import { Nebula } from './scene/Nebula';
+import { MemoryStar } from './scene/MemoryStar';
+import { BirthdayStar } from './scene/BirthdayStar';
+import { Constellation } from './scene/Constellation';
+import { Planet } from './scene/Planet';
+import { ShootingStar } from './scene/ShootingStar';
+import { HiddenStar } from './scene/HiddenStar';
+import { CameraRig } from './scene/CameraRig';
+import { Effects } from './scene/Effects';
+
+// Planet Mini-Interactions
+import { FirstMeeting } from './planets/FirstMeeting';
+import { FavoritePlace } from './planets/FavoritePlace';
+import { InsideJoke } from './planets/InsideJoke';
+import { Future } from './planets/Future';
+import { SongPlanet } from './planets/SongPlanet';
+
+// UI Overlays
+import { PasswordGate } from './ui/PasswordGate';
+import { Intro } from './ui/Intro';
+import { Progress } from './ui/Progress';
+import { MemoryCard } from './ui/MemoryCard';
+import { BirthdayModal } from './ui/BirthdayModal';
+import { HiddenStarModal } from './ui/HiddenStarModal';
+import { WishPrompt } from './ui/WishPrompt';
+import { Finale } from './ui/Finale';
+
+export const App: React.FC = () => {
+  const [hasWebGL, setHasWebGL] = useState(true);
+  const stage = useUniverse((s) => s.stage);
+  const focusedTarget = useUniverse((s) => s.focusedTarget);
+  const setFocusedTarget = useUniverse((s) => s.setFocusedTarget);
+  const setCameraFocusPos = useUniverse((s) => s.setCameraFocusPos);
+  const isWishPromptOpen = useUniverse((s) => s.isWishPromptOpen);
+  const setLowQuality = useUniverse((s) => s.setLowQuality);
+
+  // Check WebGL availability
+  useEffect(() => {
+    setHasWebGL(isWebGLAvailable());
+  }, []);
+
+  // Performance FPS monitoring to degrade gracefully if needed
+  useEffect(() => {
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let lowFpsCount = 0;
+
+    const checkFps = () => {
+      const now = performance.now();
+      frameCount++;
+
+      if (now - lastTime >= 1000) {
+        const fps = (frameCount * 1000) / (now - lastTime);
+        if (fps < 38) {
+          lowFpsCount++;
+          if (lowFpsCount >= 3) {
+            setLowQuality(true);
+          }
+        } else {
+          lowFpsCount = 0;
+        }
+        frameCount = 0;
+        lastTime = now;
+      }
+      requestAnimationFrame(checkFps);
+    };
+
+    const animId = requestAnimationFrame(checkFps);
+    return () => cancelAnimationFrame(animId);
+  }, [setLowQuality]);
+
+  const handleCloseModal = () => {
+    setFocusedTarget(null);
+    setCameraFocusPos(null);
+  };
+
+  // WebGL Fallback Screen
+  if (!hasWebGL) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'radial-gradient(ellipse at center, #0d0b2e 0%, #070817 100%)',
+        color: '#fff',
+        padding: '32px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '42px', marginBottom: '16px' }}>✨</div>
+        <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '32px', color: '#fff4e0', marginBottom: '12px' }}>
+          {FINALE_CONTENT.title}
+        </h1>
+        <p style={{ fontSize: '13px', color: '#a5b4fc', marginBottom: '24px' }}>
+          (3D graphics not supported on this browser, but the message shines just as bright)
+        </p>
+        <div style={{ maxWidth: '500px', textAlign: 'left', background: 'rgba(255,255,255,0.05)', padding: '24px', borderRadius: '18px' }}>
+          {FINALE_CONTENT.paragraphs.map((p, i) => (
+            <p key={i} style={{ marginBottom: '16px', lineHeight: 1.6, color: '#f1f5f9' }}>{p}</p>
+          ))}
+          <div style={{ fontFamily: 'Caveat, cursive', fontSize: '24px', color: '#ffd48a', textAlign: 'right' }}>
+            {FINALE_CONTENT.signOff}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Find active focused planet or memory
+  const activeMemory = focusedTarget?.type === 'memory'
+    ? MEMORIES.find((m) => m.id === focusedTarget.id)
+    : null;
+
+  const activePlanet = focusedTarget?.type === 'planet'
+    ? PLANETS.find((p) => p.id === focusedTarget.id)
+    : null;
+
+  return (
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      {/* 3D WebGL Canvas */}
+      <Canvas
+        camera={{ position: [0, 0, 4], fov: 60, near: 0.1, far: 1000 }}
+        dpr={getDeviceDpr()}
+        gl={{
+          antialias: false,
+          powerPreference: 'high-performance',
+          stencil: false,
+          depth: true
+        }}
+        style={{ width: '100%', height: '100%', background: '#070817' }}
+      >
+        <Suspense fallback={null}>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[0, 0, 0]} intensity={2.0} color="#ffd48a" distance={45} />
+          
+          <CameraRig />
+          <Nebula />
+          <Starfield />
+          <Galaxy />
+          <Constellation />
+
+          {/* Interactive Memory Stars */}
+          {MEMORIES.map((m) => (
+            <MemoryStar key={m.id} memory={m} />
+          ))}
+
+          {/* Special Birthday Star (17 Nov) */}
+          <BirthdayStar />
+
+          {/* Orbiting Worlds / Planets */}
+          {PLANETS.map((p) => (
+            <Planet key={p.id} planet={p} />
+          ))}
+
+          {/* Secret Easter Egg Hidden Star */}
+          <HiddenStar />
+
+          {/* Shooting Stars & Finale Shower */}
+          <ShootingStar />
+
+          {/* Post Processing Effects */}
+          <Effects />
+        </Suspense>
+      </Canvas>
+
+      {/* Stage: Password Gate */}
+      {stage === 'gate' && <PasswordGate />}
+
+      {/* Stage: Intro */}
+      {stage === 'intro' && <Intro />}
+
+      {/* Stage: Explore UI Controls & Progress Ring */}
+      {stage === 'explore' && <Progress />}
+
+      {/* Make a Wish Dialog */}
+      {isWishPromptOpen && <WishPrompt />}
+
+      {/* Stage: Finale Message */}
+      {stage === 'finale' && <Finale />}
+
+      {/* Active Modal Overlay (Memory, Planet, Birthday, or Easter Egg) */}
+      {focusedTarget && (
+        <div
+          onClick={handleCloseModal}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 70,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(7, 8, 23, 0.65)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            padding: '20px'
+          }}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            {activeMemory && (
+              <MemoryCard memory={activeMemory} onClose={handleCloseModal} />
+            )}
+
+            {activePlanet && activePlanet.component === 'FirstMeeting' && (
+              <FirstMeeting planet={activePlanet} onClose={handleCloseModal} />
+            )}
+
+            {activePlanet && activePlanet.component === 'FavoritePlace' && (
+              <FavoritePlace planet={activePlanet} onClose={handleCloseModal} />
+            )}
+
+            {activePlanet && activePlanet.component === 'InsideJoke' && (
+              <InsideJoke planet={activePlanet} onClose={handleCloseModal} />
+            )}
+
+            {activePlanet && activePlanet.component === 'Future' && (
+              <Future planet={activePlanet} onClose={handleCloseModal} />
+            )}
+
+            {activePlanet && activePlanet.component === 'Song' && (
+              <SongPlanet planet={activePlanet} onClose={handleCloseModal} />
+            )}
+
+            {focusedTarget.type === 'birthday' && (
+              <BirthdayModal onClose={handleCloseModal} />
+            )}
+
+            {focusedTarget.type === 'hidden' && (
+              <HiddenStarModal onClose={handleCloseModal} />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

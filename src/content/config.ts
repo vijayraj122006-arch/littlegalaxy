@@ -5,9 +5,12 @@ export const CONFIG = {
   birthday: { day: 17, month: 11 }, // 17 Nov, used for the birthday star
   song: {
     title: "Mudhal Mazhai",
-    file: "/audio/ambient.mp3",     // user supplies the audio file
+    file: "/audio/ambient.mp3",
+    // External links so she can play the original song directly without heavy downloads
+    spotifyUrl: "https://open.spotify.com/search/Mudhal%20Mazhai",
+    youtubeUrl: "https://www.youtube.com/results?search_query=Mudhal+Mazhai+song",
   },
   introLine: "I made you a small universe.",
-  targetUnlockCount: 8,            // memories required for finale unlock
-  targetPlanetCount: 2,            // planets visited required for finale unlock
+  targetUnlockCount: 4,            // tuned for 6-7 curated stars
+  targetPlanetCount: 2,            // 2 planets needed for finale
 };

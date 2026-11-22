@@ -1,9 +1,12 @@
+export type MemoryType = "moment" | "observation" | "future";
+
 export type Memory = {
   id: string;
   title: string;
-  date: string;               // ISO "2026-11-11"
+  date?: string;              // Optional for observations/future stars
+  tag: string;                // "Moment" | "Something I've noticed" | "A future thought"
   note: string;               // 1 to 3 short lines
-  photo?: string;             // "/photos/first-chat.webp"
+  photo?: string;             // "/photos/first-chat.svg"
   position: [number, number, number];
   color: string;              // hex from palette
   constellationId?: string;
@@ -11,139 +14,95 @@ export type Memory = {
 };
 
 export const MEMORIES: Memory[] = [
-  // Constellation "P" stars
+  // 1. Real Moment (Tap)
   {
     id: "mem-p1",
     title: "The First Hello",
-    date: "2026-08-14",
-    note: "A quiet evening when our first conversation started.\nNeither of us realized what a lovely world it would become.",
+    date: "11 Nov 2026",
+    tag: "Moment",
+    note: "A quiet evening when our first conversation started.\nNeither of us realized we'd end up talking for hours.",
     photo: "/photos/first-chat.svg",
-    position: [-10, -8, 4],
+    position: [-6, -4, 2],
     color: "#ff5fb7",
     constellationId: "constellation-p",
     interaction: "tap"
   },
+  // 2. Real Moment (Tap)
   {
     id: "mem-p2",
-    title: "Unstoppable Laughter",
-    date: "2026-09-02",
-    note: "That absurdly silly joke that made no sense to anyone else,\nbut had us laughing until our stomachs hurt.",
+    title: "Laughing Before The Punchline",
+    date: "A few days later",
+    tag: "Moment",
+    note: "You started telling a funny story and began laughing so hard\nhalfway through that you couldn't even finish the sentence.",
     photo: "/photos/laughter.svg",
-    position: [-10, -3, 4],
+    position: [-6, -1, 2],
     color: "#4fd6d0",
     constellationId: "constellation-p",
     interaction: "tap"
   },
+  // 3. Observation (Tap)
   {
     id: "mem-p3",
-    title: "Late Night Musings",
-    date: "2026-09-19",
-    note: "Talking about everything and nothing past midnight.\nWhen the rest of the world was asleep, our thoughts wandered free.",
-    photo: "/photos/stargazing.svg",
-    position: [-10, 2, 4],
-    color: "#7b5cff",
+    title: "How Your Voice Warms Up",
+    tag: "Something I've noticed",
+    note: "The unmistakable shift in your voice whenever\nyou talk about something you are genuinely passionate about.",
+    photo: "/photos/spark.svg",
+    position: [-6, 2, 2],
+    color: "#ffd48a",
     constellationId: "constellation-p",
-    interaction: "hold"
+    interaction: "tap"
   },
+  // 4. Observation (Tap)
   {
     id: "mem-p4",
-    title: "Shared Playlists",
-    date: "2026-10-05",
-    note: "Trading songs back and forth across distance.\nEvery track felt like a secret postcard sent in rhythm.",
-    photo: "/photos/music.svg",
-    position: [-6, 3, 4],
-    color: "#ffd48a",
+    title: "Comfortable Silence",
+    tag: "Something I've noticed",
+    note: "Even the random pauses when neither of us is saying much\nfeel completely easy, natural, and warm.",
+    photo: "/photos/tea.svg",
+    position: [-3, 3, 2],
+    color: "#fff4e0",
     constellationId: "constellation-p",
     interaction: "tap"
   },
+  // 5. Future Star (Hold-to-ignite)
   {
     id: "mem-p5",
-    title: "Quiet Understanding",
-    date: "2026-10-18",
-    note: "A day when not many words were needed.\nJust knowing you were there made the heavy air feel light.",
-    photo: "/photos/tea.svg",
-    position: [-3, 1, 4],
-    color: "#fff4e0",
+    title: "A Coffee We Don't Rush",
+    tag: "A thought for the future",
+    note: "Sitting across a table with warm coffee in hand,\nwithout anywhere else we have to be.",
+    photo: "/photos/coffee.svg",
+    position: [-1, 1.5, 2],
+    color: "#ffd48a",
     constellationId: "constellation-p",
     interaction: "hold"
   },
+  // 6. Future Star (Hold-to-ignite)
   {
     id: "mem-p6",
-    title: "Spontaneous Adventures",
-    date: "2026-11-01",
-    note: "Finding magic in the most ordinary corners.\nYou make simple days turn into unforgettable memories.",
+    title: "A Quiet Walk Somewhere New",
+    tag: "A thought for the future",
+    note: "Exploring a peaceful spot in the evening,\njust talking about everything and nothing as we walk.",
     photo: "/photos/adventure.svg",
-    position: [-6, -0.5, 4],
-    color: "#ff5fb7",
+    position: [-3, 0, 2],
+    color: "#4fd6d0",
     constellationId: "constellation-p",
-    interaction: "tap"
+    interaction: "hold"
   },
+  // 7. Future Star (Hold-to-ignite)
   {
     id: "mem-p7",
-    title: "The Heart of the 'P'",
-    date: "2026-11-11",
-    note: "The special day where everything aligned.\nA spark that lit this entire little galaxy.",
-    photo: "/photos/universe.svg",
-    position: [-10, -0.5, 4],
-    color: "#ffd48a",
+    title: "Unwritten Chapters",
+    tag: "A thought for the future",
+    note: "All the silly inside jokes, shared playlists,\nand random smiles we haven't even had yet.",
+    photo: "/photos/future.svg",
+    position: [-6, 0.2, 2],
+    color: "#ff5fb7",
     constellationId: "constellation-p",
     interaction: "hold"
-  },
-
-  // Other memories across the galaxy arms
-  {
-    id: "mem-8",
-    title: "Rainy Afternoon Reflections",
-    date: "2026-10-24",
-    note: "Listening to the sound of raindrops on glass while we texted.\nComfortable, cozy, and wonderfully genuine.",
-    photo: "/photos/rain.svg",
-    position: [12, 5, -6],
-    color: "#4fd6d0",
-    interaction: "tap"
-  },
-  {
-    id: "mem-9",
-    title: "Coffee & Daydreams",
-    date: "2026-11-04",
-    note: "Sharing our morning thoughts and favorite routines.\nSmall rituals that brighten up the start of any day.",
-    photo: "/photos/coffee.svg",
-    position: [8, -7, -8],
-    color: "#ffd48a",
-    interaction: "hold"
-  },
-  {
-    id: "mem-10",
-    title: "Random Brainwaves",
-    date: "2026-11-08",
-    note: "Out of nowhere ideas and creative rabbit holes.\nTalking to you always sparks something new and inspiring.",
-    photo: "/photos/spark.svg",
-    position: [15, -2, 5],
-    color: "#7b5cff",
-    interaction: "tap"
-  },
-  {
-    id: "mem-11",
-    title: "The Comfort Zone",
-    date: "2026-11-14",
-    note: "That rare feeling where you can be 100% yourself,\nflaws and silliness and all, and feel completely welcomed.",
-    photo: "/photos/comfort.svg",
-    position: [-8, 9, -5],
-    color: "#ff5fb7",
-    interaction: "hold"
-  },
-  {
-    id: "mem-12",
-    title: "Looking Forward",
-    date: "2026-11-20",
-    note: "All the unwritten chapters and upcoming smiles.\nThis galaxy is just getting started.",
-    photo: "/photos/future.svg",
-    position: [4, 11, 7],
-    color: "#fff4e0",
-    interaction: "tap"
   }
 ];
 
-// Ordered edges for constellations
+// Ordered edges to draw the constellation "P"
 export const CONSTELLATION_LINES: Record<string, [string, string][]> = {
   "constellation-p": [
     ["mem-p1", "mem-p2"],
@@ -152,6 +111,6 @@ export const CONSTELLATION_LINES: Record<string, [string, string][]> = {
     ["mem-p4", "mem-p5"],
     ["mem-p5", "mem-p6"],
     ["mem-p6", "mem-p7"],
-    ["mem-p7", "mem-p2"] // complete the loop of P!
+    ["mem-p7", "mem-p2"] // loop of the letter P
   ]
 };

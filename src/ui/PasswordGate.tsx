@@ -22,9 +22,9 @@ export const PasswordGate: React.FC = () => {
       setShowHint(true);
       audioSynth.playWhoosh();
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        try { navigator.vibrate([40, 40, 40]); } catch {}
+        try { navigator.vibrate([30, 30, 30]); } catch {}
       }
-      setTimeout(() => setIsShaking(false), 600);
+      setTimeout(() => setIsShaking(false), 500);
     }
   };
 
@@ -54,10 +54,10 @@ export const PasswordGate: React.FC = () => {
       <div style={{
         position: 'relative',
         zIndex: 2,
-        maxWidth: '400px',
+        maxWidth: '380px',
         width: '100%',
         textAlign: 'center',
-        transform: isShaking ? 'translateX(-10px)' : 'none',
+        transform: isShaking ? 'translateX(-8px)' : 'none',
         transition: 'transform 0.1s ease-in-out'
       }}>
         <div style={{
@@ -91,19 +91,19 @@ export const PasswordGate: React.FC = () => {
           fontFamily: 'Plus Jakarta Sans, sans-serif',
           fontSize: '14px',
           color: '#a5b4fc',
-          marginBottom: '32px',
+          marginBottom: '28px',
           letterSpacing: '0.5px'
         }}>
-          Enter the date to unlock the stars
+          Enter a date that matters to us ✨
         </p>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '18px' }}>
+          <div style={{ marginBottom: '16px' }}>
             <input
               type="text"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
-              placeholder="DD/MM/YYYY"
+              placeholder="11/11/2026"
               autoFocus
               style={{
                 width: '100%',
@@ -139,19 +139,19 @@ export const PasswordGate: React.FC = () => {
               fontFamily: 'inherit'
             }}
           >
-            Enter Universe
+            Open the Stars
           </button>
         </form>
 
         {showHint && (
           <p style={{
             fontFamily: 'Caveat, cursive',
-            fontSize: '18px',
+            fontSize: '19px',
             color: '#ffd48a',
-            marginTop: '24px',
-            opacity: 0.95
+            marginTop: '22px',
+            lineHeight: 1.3
           }}>
-            Hint: A date I'll always remember...
+            Hint: 11 / 11 / 2026 💫
           </p>
         )}
       </div>

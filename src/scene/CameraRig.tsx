@@ -7,25 +7,24 @@ import { useUniverse } from '../store/useUniverse';
 import { useGyro } from '../hooks/useGyro';
 import { prefersReducedMotion, isMobileDevice } from '../utils/device';
 import { MEMORIES } from '../content/memories';
-import { audioSynth } from '../utils/audioSynth';
 
 export const CameraRig: React.FC = () => {
-  const { camera, gl } = useThree();
+  const { camera } = useThree();
   const controlsRef = useRef<any>(null);
+  const isDraggingRef = useRef(false);
 
   const stage = useUniverse((s) => s.stage);
   const cameraFocusPos = useUniverse((s) => s.cameraFocusPos);
   const focusedTarget = useUniverse((s) => s.focusedTarget);
-  const setWishPromptOpen = useUniverse((s) => s.setWishPromptOpen);
 
   const { tiltX, tiltY } = useGyro();
   const isReduced = prefersReducedMotion();
   const isMobile = isMobileDevice();
 
-  // Overview camera coordinates (farther on portrait mobile to fit the whole galaxy)
-  const defaultCamPos = isMobile ? { x: 0, y: 16, z: 38 } : { x: 0, y: 14, z: 30 };
+  // Overview camera coordinates
+  const defaultCamPos = isMobile ? { x: 0, y: 16, z: 36 } : { x: 0, y: 14, z: 28 };
 
-  // Intro transition to Galaxy Hub
+  // Stage camera transitions
   useEffect(() => {
     if (stage === 'intro') {
       camera.position.set(0, 0, 8);
@@ -35,7 +34,7 @@ export const CameraRig: React.FC = () => {
         x: defaultCamPos.x,
         y: defaultCamPos.y,
         z: defaultCamPos.z,
-        duration: isReduced ? 0.8 : 3.0,
+        duration: isReduced ? 0.8 : 2.5,
         ease: 'power2.inOut',
         onUpdate: () => {
           camera.lookAt(0, 0, 0);
@@ -49,8 +48,8 @@ export const CameraRig: React.FC = () => {
       gsap.to(camera.position, {
         x: 0,
         y: 22,
-        z: 42,
-        duration: isReduced ? 1.0 : 4.0,
+        z: 40,
+        duration: isReduced ? 1.0 : 3.5,
         ease: 'expo.out',
         onUpdate: () => {
           camera.lookAt(0, 0, 0);
@@ -73,7 +72,7 @@ export const CameraRig: React.FC = () => {
         x: camTargetPos.x,
         y: camTargetPos.y + 0.6,
         z: camTargetPos.z,
-        duration: isReduced ? 0.6 : 1.8,
+        duration: isReduced ? 0.6 : 1.6,
         ease: 'power2.inOut',
         onUpdate: () => {
           if (controlsRef.current) {
@@ -83,12 +82,12 @@ export const CameraRig: React.FC = () => {
         }
       });
     } else if (!focusedTarget && stage === 'explore') {
-      // Return to default hub view
+      // Return smoothly to default hub view
       gsap.to(camera.position, {
         x: defaultCamPos.x,
         y: defaultCamPos.y,
         z: defaultCamPos.z,
-        duration: 1.8,
+        duration: 1.6,
         ease: 'power2.out',
         onUpdate: () => {
           if (controlsRef.current) {
@@ -98,24 +97,15 @@ export const CameraRig: React.FC = () => {
         }
       });
     }
-  }, [cameraFocusPos, focusedTarget, stage, camera, isReduced, defaultCamPos]);
+  }, [cameraFocusPos, focusedTarget, stage, camera, isReduced]);
 
-  // Gyro parallax & proximity
+  // Subtle gyro parallax without fighting OrbitControls
   useFrame(() => {
-    if (stage === 'explore' && !focusedTarget) {
-      if (Math.abs(tiltX) > 0.01 || Math.abs(tiltY) > 0.01) {
-        camera.position.x += (tiltX * 1.5 - (camera.position.x - defaultCamPos.x)) * 0.02;
-        camera.position.y += (-tiltY * 1.5 - (camera.position.y - defaultCamPos.y)) * 0.02;
+    if (stage === 'explore' && !focusedTarget && !isDraggingRef.current) {
+      if (Math.abs(tiltX) > 0.02 || Math.abs(tiltY) > 0.02) {
+        camera.position.x += tiltX * 0.03;
+        camera.position.y += -tiltY * 0.03;
       }
-
-      let minDist = 999;
-      MEMORIES.forEach((m) => {
-        const d = camera.position.distanceTo(new THREE.Vector3(...m.position));
-        if (d < minDist) minDist = d;
-      });
-
-      const prox = Math.max(0, Math.min(1, (16.0 - minDist) / 12.0));
-      audioSynth.setProximity(prox);
     }
   });
 
@@ -123,14 +113,16 @@ export const CameraRig: React.FC = () => {
     <OrbitControls
       ref={controlsRef}
       enableDamping
-      dampingFactor={0.06}
-      rotateSpeed={0.7}
-      zoomSpeed={0.8}
+      dampingFactor={0.08}
+      rotateSpeed={0.8}
+      zoomSpeed={0.9}
       minDistance={6}
-      maxDistance={60}
+      maxDistance={65}
       maxPolarAngle={Math.PI / 1.7}
       minPolarAngle={Math.PI / 8}
       enabled={stage === 'explore' && !focusedTarget}
+      onStart={() => { isDraggingRef.current = true; }}
+      onEnd={() => { isDraggingRef.current = false; }}
     />
   );
 };

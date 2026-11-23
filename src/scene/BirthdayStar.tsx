@@ -4,8 +4,7 @@ import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { CONFIG } from '../content/config';
 import { useUniverse } from '../store/useUniverse';
-import { audioSynth } from '../utils/audioSynth';
-import { Gift } from 'lucide-react';
+import { audioManager } from '../utils/audioManager';
 
 export const BirthdayStar: React.FC = () => {
   const meshRef = useRef<THREE.Group>(null);
@@ -40,11 +39,21 @@ export const BirthdayStar: React.FC = () => {
     }
   });
 
+  const openBirthdayModal = () => {
+    audioManager.playWhoosh();
+    audioManager.playChime(880);
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate([40, 70, 100]); } catch {}
+    }
+    setCameraFocusPos(starPosition);
+    setFocusedTarget({ type: 'birthday', id: 'birthday-star' });
+  };
+
   const handlePointerDown = (e: any) => {
     e.stopPropagation();
 
     let start = performance.now();
-    const duration = 1200;
+    const duration = 1000;
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       try { navigator.vibrate(25); } catch {}
     }
@@ -59,13 +68,7 @@ export const BirthdayStar: React.FC = () => {
       } else {
         setHoldProgress(0);
         holdTimerRef.current = null;
-        audioSynth.playWhoosh();
-        audioSynth.playChime(880);
-        if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          try { navigator.vibrate([40, 70, 100]); } catch {}
-        }
-        setCameraFocusPos(starPosition);
-        setFocusedTarget({ type: 'birthday', id: 'birthday-star' });
+        openBirthdayModal();
       }
     };
     holdTimerRef.current = requestAnimationFrame(step);
@@ -79,10 +82,17 @@ export const BirthdayStar: React.FC = () => {
     }
   };
 
+  // Support instant click/tap as well so users who don't hold still get the modal
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    openBirthdayModal();
+  };
+
   return (
     <group
       ref={meshRef}
       position={starPosition}
+      onClick={handleClick}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
@@ -101,60 +111,51 @@ export const BirthdayStar: React.FC = () => {
         <meshBasicMaterial
           color={goldColor}
           transparent
-          opacity={isBirthdayToday ? 0.9 : 0.7}
+          opacity={hovered ? 0.95 : 0.75}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
         />
       </mesh>
 
-      {/* Charging hold ring */}
-      {holdProgress > 0 && (
-        <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.4, 1.8, 32]} />
-          <meshBasicMaterial
-            color="#fff4e0"
-            transparent
-            opacity={0.5 + holdProgress * 0.5}
-            side={THREE.DoubleSide}
-            blending={THREE.AdditiveBlending}
-            toneMapped={false}
-          />
-        </mesh>
-      )}
+      {/* Radiant Golden Rings */}
+      <mesh ref={ringRef} rotation={[Math.PI / 3, Math.PI / 4, 0]}>
+        <ringGeometry args={[1.5, 2.0, 36]} />
+        <meshBasicMaterial
+          color={goldColor}
+          transparent
+          opacity={0.65}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
 
-      {/* Floating 3D Label Tag */}
+      {/* Clear, Non-Suspending HTML Birthday Label */}
       <Html
-        position={[0, 1.8, 0]}
         center
-        distanceFactor={22}
+        position={[0, 2.0, 0]}
+        distanceFactor={24}
         style={{
           pointerEvents: 'none',
           userSelect: 'none',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          color: '#ffd48a',
+          fontFamily: 'Caveat, cursive',
+          fontSize: '18px',
+          fontWeight: 700,
+          letterSpacing: '1px',
+          textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 16px rgba(255, 212, 138, 0.8)',
+          background: 'rgba(25, 18, 5, 0.75)',
+          padding: '3px 12px',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 212, 138, 0.6)',
+          transform: hovered ? 'scale(1.15)' : 'scale(1)',
+          transition: 'transform 0.2s ease',
         }}
       >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          background: 'rgba(255, 212, 138, 0.35)',
-          backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255, 212, 138, 0.7)',
-          borderRadius: '18px',
-          padding: '5px 12px',
-          color: '#fff',
-          fontSize: '12px',
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          fontWeight: 600,
-          boxShadow: '0 0 20px rgba(255, 212, 138, 0.5)',
-          textShadow: '0 0 4px #000',
-          transform: hovered ? 'scale(1.12)' : 'scale(1)',
-          transition: 'transform 0.2s ease'
-        }}>
-          <Gift size={12} color="#ffd48a" />
-          <span>Birthday Star (17 Nov)</span>
-        </div>
+        ✨ Pooja's Day (17 Nov)
       </Html>
     </group>
   );

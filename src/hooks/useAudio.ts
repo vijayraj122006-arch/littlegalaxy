@@ -1,86 +1,43 @@
-import { useEffect, useRef } from 'react';
-import { Howl } from 'howler';
+import { useState, useEffect } from 'react';
+import { audioManager } from '../utils/audioManager';
 import { useUniverse } from '../store/useUniverse';
-import { CONFIG } from '../content/config';
-import { audioSynth } from '../utils/audioSynth';
 
 export function useAudio() {
-  const { audioOn, setAudioOn } = useUniverse();
-  const soundRef = useRef<Howl | null>(null);
+  const audioOn = useUniverse((s) => s.audioOn);
+  const setAudioOn = useUniverse((s) => s.setAudioOn);
+  const [isPlaying, setIsPlaying] = useState<boolean>(audioManager.isPlaying());
 
   useEffect(() => {
-    // Attempt to load external song if available
-    let howl: Howl | null = null;
-    try {
-      howl = new Howl({
-        src: [CONFIG.song.file],
-        html5: true,
-        loop: true,
-        volume: 0.4,
-        onloaderror: () => {
-          // If external mp3 is not present yet, rely completely on audioSynth
-          console.info("Using dreamy ambient synthesizer engine.");
-        }
-      });
-      soundRef.current = howl;
-    } catch {
-      // Fallback
-    }
-
-    return () => {
-      if (howl) {
-        howl.stop();
-        howl.unload();
-      }
-    };
-  }, []);
+    const unsub = audioManager.subscribe((playing) => {
+      setIsPlaying(playing);
+      setAudioOn(playing);
+    });
+    return unsub;
+  }, [setAudioOn]);
 
   useEffect(() => {
-    if (audioOn) {
-      audioSynth.setMuted(false);
-      audioSynth.startAmbient();
-      if (soundRef.current && soundRef.current.state() === 'loaded') {
-        soundRef.current.play();
-      }
-    } else {
-      audioSynth.setMuted(true);
-      if (soundRef.current) {
-        soundRef.current.pause();
-      }
-    }
+    audioManager.setMuted(!audioOn);
   }, [audioOn]);
 
   const toggle = () => {
-    setAudioOn(!audioOn);
+    const nowPlaying = audioManager.toggle();
+    setAudioOn(nowPlaying);
   };
 
   const playChime = (freq?: number) => {
-    audioSynth.playChime(freq);
+    audioManager.playChime(freq);
   };
 
   const playWhoosh = () => {
-    audioSynth.playWhoosh();
-  };
-
-  const playRain = () => {
-    audioSynth.playRainDrop();
-  };
-
-  const playFinale = () => {
-    audioSynth.playFinaleSwell();
-  };
-
-  const updateProximity = (proximity: number) => {
-    audioSynth.setProximity(proximity);
+    audioManager.playWhoosh();
   };
 
   return {
     audioOn,
+    isPlaying,
     toggle,
     playChime,
     playWhoosh,
-    playRain,
-    playFinale,
-    updateProximity,
+    unlock: () => audioManager.unlock(),
   };
 }

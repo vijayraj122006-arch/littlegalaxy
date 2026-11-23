@@ -4,8 +4,7 @@ import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { Memory } from '../content/memories';
 import { useUniverse } from '../store/useUniverse';
-import { audioSynth } from '../utils/audioSynth';
-import { Heart } from 'lucide-react';
+import { audioManager } from '../utils/audioManager';
 
 interface MemoryStarProps {
   memory: Memory;
@@ -61,8 +60,8 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
         } else {
           setHoldProgress(0);
           holdTimerRef.current = null;
-          audioSynth.playWhoosh();
-          audioSynth.playChime(880);
+          audioManager.playWhoosh();
+          audioManager.playChime(880);
           if (typeof navigator !== 'undefined' && navigator.vibrate) {
             try { navigator.vibrate([30, 50, 90]); } catch {}
           }
@@ -72,7 +71,7 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
       };
       holdTimerRef.current = requestAnimationFrame(step);
     } else {
-      audioSynth.playChime(659.25);
+      audioManager.playChime(659.25);
       setCameraFocusPos(memory.position);
       setFocusedTarget({ type: 'memory', id: memory.id });
     }
@@ -107,11 +106,11 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
 
       {/* Atmospheric Glowing Corona */}
       <mesh ref={haloRef}>
-        <sphereGeometry args={[1.2 * baseScale, 24, 24]} />
+        <sphereGeometry args={[1.25 * baseScale, 24, 24]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={isVisited ? 0.7 : (hovered ? 0.85 : 0.55)}
+          opacity={isVisited ? 0.75 : (hovered ? 0.9 : 0.6)}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
@@ -120,11 +119,11 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
 
       {/* Shimmering Star Ring */}
       <mesh ref={ringRef} rotation={[Math.PI / 3, Math.PI / 4, 0]}>
-        <ringGeometry args={[1.1 * baseScale, 1.35 * baseScale, 32]} />
+        <ringGeometry args={[1.15 * baseScale, 1.4 * baseScale, 32]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.65}
+          opacity={0.7}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -132,14 +131,14 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
         />
       </mesh>
 
-      {/* Hold-to-ignite charging ring */}
+      {/* Charging hold ring */}
       {holdProgress > 0 && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.3, 1.6, 32]} />
+          <ringGeometry args={[1.3, 1.7, 32]} />
           <meshBasicMaterial
             color="#ffd48a"
             transparent
-            opacity={0.4 + holdProgress * 0.6}
+            opacity={0.5 + holdProgress * 0.5}
             side={THREE.DoubleSide}
             blending={THREE.AdditiveBlending}
             toneMapped={false}
@@ -147,38 +146,30 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
         </mesh>
       )}
 
-      {/* Floating 3D Starlight Label (Guarantees High Visibility) */}
+      {/* Clear, Non-Suspending HTML Starlight Label */}
       <Html
-        position={[0, 1.4 * baseScale, 0]}
         center
-        distanceFactor={22}
+        position={[0, 1.6 * baseScale, 0]}
+        distanceFactor={24}
         style={{
           pointerEvents: 'none',
           userSelect: 'none',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          color: '#ffffff',
+          fontFamily: 'Plus Jakarta Sans, sans-serif',
+          fontSize: '13px',
+          fontWeight: 600,
+          letterSpacing: '0.5px',
+          textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6)',
+          background: 'rgba(7, 8, 23, 0.65)',
+          padding: '2px 8px',
+          borderRadius: '10px',
+          border: `1px solid ${memory.color}88`,
+          transform: hovered ? 'scale(1.15)' : 'scale(1)',
+          transition: 'transform 0.2s ease',
         }}
       >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '5px',
-          background: isVisited ? 'rgba(255, 95, 183, 0.45)' : 'rgba(13, 11, 46, 0.75)',
-          backdropFilter: 'blur(8px)',
-          border: `1px solid ${memory.color}88`,
-          borderRadius: '16px',
-          padding: '4px 10px',
-          color: '#fff',
-          fontSize: '11px',
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          fontWeight: 500,
-          boxShadow: `0 0 15px ${memory.color}55`,
-          textShadow: '0 0 4px #000',
-          transform: hovered ? 'scale(1.1)' : 'scale(1)',
-          transition: 'transform 0.2s ease'
-        }}>
-          <Heart size={10} fill={memory.color} color={memory.color} />
-          <span>{memory.title}</span>
-        </div>
+        {memory.title}
       </Html>
     </group>
   );

@@ -35,53 +35,8 @@ class DreamyAudioEngine {
   }
 
   public startAmbient() {
-    this.initContext();
-    if (!this.ctx || this.ambientGain) return;
-
-    const ctx = this.ctx;
-    const masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.25, ctx.currentTime);
-    masterGain.connect(ctx.destination);
-    this.ambientGain = masterGain;
-
-    // Create a proximity layer for zooming into stars
-    const proxGain = ctx.createGain();
-    proxGain.gain.setValueAtTime(0, ctx.currentTime);
-    proxGain.connect(ctx.destination);
-    this.proximityGain = proxGain;
-
-    // Pentatonic scale frequencies representing "Mudhal Mazhai" dreamy mood (D minor / F major: D, F, G, A, C)
-    const baseFreqs = [146.83, 174.61, 220.0, 261.63, 293.66, 349.23];
-
-    // Lush ambient drones with gentle low-pass filter
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(450, ctx.currentTime);
-    filter.connect(masterGain);
-
-    baseFreqs.slice(0, 3).forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const oscGain = ctx.createGain();
-      osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
-      // Subtle detune for shimmer
-      osc.detune.setValueAtTime((idx - 1) * 7, ctx.currentTime);
-
-      oscGain.gain.setValueAtTime(0.12 / (idx + 1), ctx.currentTime);
-      osc.connect(oscGain);
-      oscGain.connect(filter);
-      osc.start();
-      this.ambientOscillators.push(osc);
-    });
-
-    // Random gentle harp/bell notes drifting in the background
-    this.ambientInterval = window.setInterval(() => {
-      if (this.isMuted || !this.ctx) return;
-      const notes = [440, 523.25, 587.33, 659.25, 783.99, 880];
-      const randomNote = notes[Math.floor(Math.random() * notes.length)];
-      this.playChime(randomNote, 0.08);
-    }, 4500);
+    // Ambient drone disabled so Mudhal Mazhai plays cleanly
+    return;
   }
 
   public setProximity(proximity: number) {

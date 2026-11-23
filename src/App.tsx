@@ -1,10 +1,11 @@
-import React, { useEffect, useState, Suspense, useRef } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { useUniverse } from './store/useUniverse';
 import { MEMORIES } from './content/memories';
 import { PLANETS } from './content/planets';
 import { FINALE_CONTENT } from './content/finale';
 import { isWebGLAvailable, getDeviceDpr } from './utils/device';
+import { audioManager } from './utils/audioManager';
 
 // 3D Scene Components
 import { Galaxy } from './scene/Galaxy';
@@ -45,41 +46,10 @@ export const App: React.FC = () => {
   const isWishPromptOpen = useUniverse((s) => s.isWishPromptOpen);
   const setLowQuality = useUniverse((s) => s.setLowQuality);
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
   // Check WebGL availability
   useEffect(() => {
     setHasWebGL(isWebGLAvailable());
   }, []);
-
-  // Automatic audio play on first touch / click
-  useEffect(() => {
-    const handleStartAudio = () => {
-      if (audioRef.current && audioRef.current.paused) {
-        audioRef.current.play().then(() => {
-          setAudioOn(true);
-        }).catch(() => {});
-      }
-    };
-
-    window.addEventListener('pointerdown', handleStartAudio, { once: true });
-    window.addEventListener('keydown', handleStartAudio, { once: true });
-    return () => {
-      window.removeEventListener('pointerdown', handleStartAudio);
-      window.removeEventListener('keydown', handleStartAudio);
-    };
-  }, [setAudioOn]);
-
-  // Sync audio tag with store state
-  useEffect(() => {
-    if (audioRef.current) {
-      if (audioOn) {
-        audioRef.current.play().catch(() => {});
-      } else {
-        audioRef.current.pause();
-      }
-    }
-  }, [audioOn]);
 
   // Performance FPS monitoring
   useEffect(() => {
@@ -93,7 +63,7 @@ export const App: React.FC = () => {
 
       if (now - lastTime >= 1000) {
         const fps = (frameCount * 1000) / (now - lastTime);
-        if (fps < 35) {
+        if (fps < 30) {
           lowFpsCount++;
           if (lowFpsCount >= 3) {
             setLowQuality(true);
@@ -156,17 +126,9 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', background: '#060719' }}>
-      {/* Background Audio Player (Mudhal Mazhai) */}
-      <audio
-        ref={audioRef}
-        src="/audio/ambient.mp3"
-        loop
-        preload="auto"
-      />
-
       {/* 3D WebGL Canvas */}
       <Canvas
-        camera={{ position: [0, 14, 32], fov: 60, near: 0.1, far: 1000 }}
+        camera={{ position: [0, 16, 32], fov: 60, near: 0.1, far: 1000 }}
         dpr={getDeviceDpr()}
         gl={{
           antialias: true,

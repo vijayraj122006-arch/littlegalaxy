@@ -4,8 +4,7 @@ import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { PlanetDef } from '../content/planets';
 import { useUniverse } from '../store/useUniverse';
-import { audioSynth } from '../utils/audioSynth';
-import { Sparkles } from 'lucide-react';
+import { audioManager } from '../utils/audioManager';
 
 interface PlanetProps {
   planet: PlanetDef;
@@ -25,7 +24,7 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
 
   const color = new THREE.Color(planet.color);
   const glowColor = new THREE.Color(planet.glowColor);
-  const planetRadius = planet.size * 1.35; // increased size for clear visibility
+  const planetRadius = planet.size * 1.35;
 
   useFrame((_, delta) => {
     if (sphereRef.current) {
@@ -39,8 +38,8 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
 
   const handleClick = (e: any) => {
     e.stopPropagation();
-    audioSynth.playWhoosh();
-    audioSynth.playChime(523.25);
+    audioManager.playWhoosh();
+    audioManager.playChime(523.25);
     setCameraFocusPos(planet.position);
     setFocusedTarget({ type: 'planet', id: planet.id });
   };
@@ -58,10 +57,10 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
         <sphereGeometry args={[planetRadius, 32, 32]} />
         <meshStandardMaterial
           color={color}
-          roughness={0.4}
+          roughness={0.35}
           metalness={0.15}
           emissive={color}
-          emissiveIntensity={hovered ? 0.65 : 0.4}
+          emissiveIntensity={hovered ? 0.75 : 0.45}
         />
       </mesh>
 
@@ -71,7 +70,7 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
         <meshBasicMaterial
           color={glowColor}
           transparent
-          opacity={hovered ? 0.55 : 0.35}
+          opacity={hovered ? 0.6 : 0.4}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -85,45 +84,37 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.45}
+          opacity={0.5}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
 
-      {/* Floating 3D Label Tag */}
+      {/* Clear, Non-Suspending HTML Planet Label */}
       <Html
-        position={[0, planetRadius * 1.8, 0]}
         center
-        distanceFactor={22}
+        position={[0, planetRadius * 1.8, 0]}
+        distanceFactor={28}
         style={{
           pointerEvents: 'none',
           userSelect: 'none',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          color: '#ffffff',
+          fontFamily: 'Plus Jakarta Sans, sans-serif',
+          fontSize: '14px',
+          fontWeight: 600,
+          letterSpacing: '1px',
+          textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 14px rgba(255,255,255,0.7)',
+          background: 'rgba(7, 8, 23, 0.7)',
+          padding: '3px 10px',
+          borderRadius: '12px',
+          border: `1px solid ${planet.color}aa`,
+          transform: hovered ? 'scale(1.15)' : 'scale(1)',
+          transition: 'transform 0.2s ease',
         }}
       >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          background: isVisited ? 'rgba(79, 214, 208, 0.45)' : 'rgba(13, 11, 46, 0.85)',
-          backdropFilter: 'blur(8px)',
-          border: `1px solid ${planet.glowColor}88`,
-          borderRadius: '18px',
-          padding: '5px 12px',
-          color: '#fff',
-          fontSize: '12px',
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          fontWeight: 600,
-          boxShadow: `0 0 20px ${planet.color}66`,
-          textShadow: '0 0 4px #000',
-          transform: hovered ? 'scale(1.12)' : 'scale(1)',
-          transition: 'transform 0.2s ease'
-        }}>
-          <Sparkles size={12} color={planet.color} />
-          <span>{planet.name}</span>
-        </div>
+        🪐 {planet.name}
       </Html>
     </group>
   );

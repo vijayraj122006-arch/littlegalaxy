@@ -4,39 +4,46 @@ import { BlendFunction } from 'postprocessing';
 import { useUniverse } from '../store/useUniverse';
 import { prefersReducedMotion } from '../utils/device';
 
+class PostprocessingErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any) {
+    console.warn('Postprocessing gracefully bypassed:', error);
+  }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
+
 export const Effects: React.FC = () => {
   const isLowQuality = useUniverse((s) => s.isLowQuality);
   const reducedMotion = prefersReducedMotion();
 
-  if (isLowQuality || reducedMotion) {
-    return (
+  return (
+    <PostprocessingErrorBoundary>
       <EffectComposer multisampling={0}>
         <Bloom
-          luminanceThreshold={0.08}
-          luminanceSmoothing={0.7}
-          intensity={1.0}
+          luminanceThreshold={0.12}
+          luminanceSmoothing={0.6}
+          intensity={isLowQuality || reducedMotion ? 0.9 : 1.25}
           mipmapBlur
         />
-        <Vignette eskil={false} offset={0.5} darkness={0.35} />
+        <Vignette
+          eskil={false}
+          offset={0.6}
+          darkness={0.3}
+          blendFunction={BlendFunction.NORMAL}
+        />
       </EffectComposer>
-    );
-  }
-
-  return (
-    <EffectComposer multisampling={0}>
-      <Bloom
-        luminanceThreshold={0.08}
-        luminanceSmoothing={0.7}
-        intensity={1.3}
-        mipmapBlur
-      />
-      {/* Gentle soft edge vignette (never obscuring stars or planets) */}
-      <Vignette
-        eskil={false}
-        offset={0.6}
-        darkness={0.35}
-        blendFunction={BlendFunction.NORMAL}
-      />
-    </EffectComposer>
+    </PostprocessingErrorBoundary>
   );
 };

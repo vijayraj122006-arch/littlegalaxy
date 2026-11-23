@@ -14,11 +14,21 @@ export const Galaxy: React.FC = () => {
   const particleCount = useMemo(() => getParticleBudget(), []);
   const galaxyData = useMemo(() => generateGalaxyData(particleCount), [particleCount]);
 
+  // Robust Three.js BufferGeometry creation with standard attributes
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(galaxyData.positions, 3));
+    geo.setAttribute('aColor', new THREE.BufferAttribute(galaxyData.colors, 3));
+    geo.setAttribute('aSize', new THREE.BufferAttribute(galaxyData.sizes, 1));
+    geo.setAttribute('aTwinkle', new THREE.BufferAttribute(galaxyData.twinkles, 1));
+    return geo;
+  }, [galaxyData]);
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
       uPixelRatio: { value: Math.min(gl.getPixelRatio(), 2) },
-      uSizeMultiplier: { value: 1.0 },
+      uSizeMultiplier: { value: 1.2 },
     }),
     [gl]
   );
@@ -28,31 +38,12 @@ export const Galaxy: React.FC = () => {
       shaderMatRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
     }
     if (pointsRef.current) {
-      // Gentle dreamy idle drift
-      pointsRef.current.rotation.y += delta * 0.02;
+      pointsRef.current.rotation.y += delta * 0.025;
     }
   });
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[galaxyData.positions, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-aColor"
-          args={[galaxyData.colors, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-aSize"
-          args={[galaxyData.sizes, 1]}
-        />
-        <bufferAttribute
-          attach="attributes-aTwinkle"
-          args={[galaxyData.twinkles, 1]}
-        />
-      </bufferGeometry>
+    <points ref={pointsRef} geometry={geometry}>
       <shaderMaterial
         ref={shaderMatRef}
         vertexShader={starVert}

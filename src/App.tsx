@@ -140,11 +140,11 @@ export const App: React.FC = () => {
         style={{ width: '100%', height: '100%', background: '#060719' }}
       >
         <Suspense fallback={null}>
-          {/* Cinematic 3D Scene Lighting */}
-          <ambientLight intensity={0.9} color="#e2e8f0" />
-          <directionalLight position={[15, 25, 18]} intensity={1.4} color="#ffe5ec" />
-          <directionalLight position={[-18, -12, -14]} intensity={0.9} color="#818cf8" />
-          <pointLight position={[0, 1, 0]} intensity={1.1} color="#ffd48a" distance={60} decay={2} />
+          {/* Cinematic 3D Scene Lighting with Realistic Space Terminator */}
+          <ambientLight intensity={0.45} color="#e0e7ff" />
+          <directionalLight position={[18, 24, 16]} intensity={1.2} color="#ffe5ec" />
+          <directionalLight position={[-18, -12, -14]} intensity={0.6} color="#818cf8" />
+          <pointLight position={[0, 0, 0]} intensity={2.2} color="#ffd48a" distance={75} decay={1.2} />
           
           <CameraRig />
           <Nebula />

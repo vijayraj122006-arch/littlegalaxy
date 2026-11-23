@@ -120,6 +120,8 @@ export const CameraRig: React.FC = () => {
       maxDistance={65}
       maxPolarAngle={Math.PI / 1.7}
       minPolarAngle={Math.PI / 8}
+      autoRotate={stage === 'explore' && !focusedTarget && !isDraggingRef.current}
+      autoRotateSpeed={0.35}
       enabled={stage === 'explore' && !focusedTarget}
       onStart={() => { isDraggingRef.current = true; }}
       onEnd={() => { isDraggingRef.current = false; }}

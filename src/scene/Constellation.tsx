@@ -5,10 +5,8 @@ import { useUniverse } from '../store/useUniverse';
 
 export const Constellation: React.FC = () => {
   const visitedMemories = useUniverse((s) => s.visitedMemories);
-  const drawnLines = useUniverse((s) => s.drawnLines);
   const wishes = useUniverse((s) => s.wishes);
 
-  // Map of memory ID to position
   const memoryPosMap = useMemo(() => {
     const map = new Map<string, [number, number, number]>();
     MEMORIES.forEach((m) => {
@@ -17,47 +15,38 @@ export const Constellation: React.FC = () => {
     return map;
   }, []);
 
-  // Compute active lines for predefined constellations (e.g. 'P')
-  const { linePositions, lineColors } = useMemo(() => {
-    const positions: number[] = [];
-    const colors: number[] = [];
+  // Compute glowing active lines and faint guide lines for Constellation "P"
+  const { activePos, activeCols, guidePos } = useMemo(() => {
+    const actP: number[] = [];
+    const actC: number[] = [];
+    const guiP: number[] = [];
 
     const gold = new THREE.Color('#ffd48a');
-    const cyan = new THREE.Color('#4fd6d0');
     const pink = new THREE.Color('#ff5fb7');
 
-    // 1. Check predefined constellation "P"
     const pEdges = CONSTELLATION_LINES['constellation-p'] || [];
     pEdges.forEach(([idA, idB]) => {
-      // Connect if both are visited, or if at least one is visited connect with subtle glow
+      const posA = memoryPosMap.get(idA);
+      const posB = memoryPosMap.get(idB);
+      if (!posA || !posB) return;
+
       const visitedA = visitedMemories.includes(idA);
       const visitedB = visitedMemories.includes(idB);
 
       if (visitedA && visitedB) {
-        const posA = memoryPosMap.get(idA);
-        const posB = memoryPosMap.get(idB);
-        if (posA && posB) {
-          positions.push(...posA, ...posB);
-          colors.push(pink.r, pink.g, pink.b, gold.r, gold.g, gold.b);
-        }
-      }
-    });
-
-    // 2. User drawn constellation lines
-    drawnLines.forEach(([idA, idB]) => {
-      const posA = memoryPosMap.get(idA);
-      const posB = memoryPosMap.get(idB);
-      if (posA && posB) {
-        positions.push(...posA, ...posB);
-        colors.push(cyan.r, cyan.g, cyan.b, cyan.r, cyan.g, cyan.b);
+        actP.push(...posA, ...posB);
+        actC.push(pink.r, pink.g, pink.b, gold.r, gold.g, gold.b);
+      } else {
+        guiP.push(...posA, ...posB);
       }
     });
 
     return {
-      linePositions: new Float32Array(positions),
-      lineColors: new Float32Array(colors),
+      activePos: new Float32Array(actP),
+      activeCols: new Float32Array(actC),
+      guidePos: new Float32Array(guiP),
     };
-  }, [visitedMemories, drawnLines, memoryPosMap]);
+  }, [visitedMemories, memoryPosMap]);
 
   // Wish stars positions
   const wishPositions = useMemo(() => {
@@ -72,23 +61,23 @@ export const Constellation: React.FC = () => {
 
   return (
     <group>
-      {/* Glowing constellation lines */}
-      {linePositions.length > 0 && (
+      {/* 1. Blazing lit constellation lines for letter "P" */}
+      {activePos.length > 0 && (
         <lineSegments>
           <bufferGeometry>
             <bufferAttribute
               attach="attributes-position"
-              args={[linePositions, 3]}
+              args={[activePos, 3]}
             />
             <bufferAttribute
               attach="attributes-color"
-              args={[lineColors, 3]}
+              args={[activeCols, 3]}
             />
           </bufferGeometry>
           <lineBasicMaterial
             vertexColors
             transparent
-            opacity={0.85}
+            opacity={0.9}
             linewidth={2}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
@@ -96,7 +85,27 @@ export const Constellation: React.FC = () => {
         </lineSegments>
       )}
 
-      {/* Persistent faint wish stars */}
+      {/* 2. Faint ethereal cosmic guide lines */}
+      {guidePos.length > 0 && (
+        <lineSegments>
+          <bufferGeometry>
+            <bufferAttribute
+              attach="attributes-position"
+              args={[guidePos, 3]}
+            />
+          </bufferGeometry>
+          <lineBasicMaterial
+            color="#a5b4fc"
+            transparent
+            opacity={0.12}
+            linewidth={1}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </lineSegments>
+      )}
+
+      {/* 3. Released wish stars */}
       {wishPositions.length > 0 && (
         <points>
           <bufferGeometry>
@@ -106,10 +115,10 @@ export const Constellation: React.FC = () => {
             />
           </bufferGeometry>
           <pointsMaterial
-            size={1.2}
-            color="#ffe6b8"
+            size={0.9}
+            color="#ffd48a"
             transparent
-            opacity={0.7}
+            opacity={0.95}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
           />

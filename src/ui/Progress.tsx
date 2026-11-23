@@ -81,7 +81,7 @@ export const Progress: React.FC = () => {
             />
           </svg>
           <span style={{ fontSize: '12px', color: '#fff4e0', letterSpacing: '1px', fontWeight: 500 }}>
-            {visitedMemories.length} / {totalMemories} stars
+            {visitedMemories.length === totalMemories ? '✨ Constellation P (Pooja)' : `${visitedMemories.length} / ${totalMemories} stars`}
           </span>
           <span style={{ fontSize: '11px', color: '#c4b5fd' }}>
             • {visitedPlanets.length}/{PLANETS.length} worlds

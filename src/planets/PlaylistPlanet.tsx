@@ -167,7 +167,7 @@ export const PlaylistPlanet: React.FC<Props> = ({ planet, onClose }) => {
             fontFamily: 'inherit'
           }}
         >
-          Close
+          Back to Galaxy View 🌌
         </button>
       </div>
     </div>

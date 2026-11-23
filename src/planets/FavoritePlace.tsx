@@ -1,5 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { PlanetDef } from '../content/planets';
+import { audioManager } from '../utils/audioManager';
+import { Palette, ChevronLeft, ChevronRight, Heart, Sparkles } from 'lucide-react';
 
 interface Props {
   planet: PlanetDef;
@@ -7,118 +9,237 @@ interface Props {
 }
 
 export const FavoritePlace: React.FC<Props> = ({ planet, onClose }) => {
-  const [panX, setPanX] = useState(0);
-  const isDraggingRef = useRef(false);
-  const startXRef = useRef(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    isDraggingRef.current = true;
-    startXRef.current = e.clientX;
+  const artPieces = [
+    {
+      title: "Quiet Watercolors & Sketches",
+      subtitle: "Her Artistic Soul",
+      icon: "🎨",
+      text: "How painting and sketching bring you quiet peace when days get loud. The world feels so much softer and warmer through your art.",
+      tag: "Sketchbook"
+    },
+    {
+      title: "Pinterest Moodboards & Aesthetic Eyes",
+      subtitle: "Creative Inspirations",
+      icon: "✨",
+      text: "Losing track of time scrolling Pinterest for hours, collecting quiet aesthetic colors, cozy coffee scenes, and drawing inspirations.",
+      tag: "Inspiration"
+    },
+    {
+      title: "Dancing Cats & Harris Jayaraj Songs",
+      subtitle: "Our Cozy Vibe",
+      icon: "🐱",
+      text: "Mundhinam Paartheney playing on loop, cute dancing cat stickers, and sharing little moments that make you smile without trying.",
+      tag: "Soundtrack"
+    }
+  ];
+
+  const handleNext = () => {
+    audioManager.playChime(659.25);
+    setCurrentSlide((prev) => (prev + 1) % artPieces.length);
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-    const dx = e.clientX - startXRef.current;
-    setPanX((prev) => (prev + dx * 0.4) % 360);
-    startXRef.current = e.clientX;
+  const handlePrev = () => {
+    audioManager.playChime(523.25);
+    setCurrentSlide((prev) => (prev - 1 + artPieces.length) % artPieces.length);
   };
 
-  const handlePointerUp = () => {
-    isDraggingRef.current = false;
+  const handleClose = () => {
+    audioManager.playWhoosh();
+    onClose();
   };
+
+  const active = artPieces[currentSlide];
 
   return (
     <div style={{
-      maxWidth: '480px',
-      width: '92vw',
-      background: 'rgba(11, 26, 46, 0.9)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      border: '1px solid rgba(79, 214, 208, 0.4)',
+      maxWidth: '460px',
+      width: '100%',
+      background: 'rgba(12, 28, 48, 0.94)',
+      backdropFilter: 'blur(24px)',
+      WebkitBackdropFilter: 'blur(24px)',
+      border: '1px solid rgba(79, 214, 208, 0.5)',
       borderRadius: '24px',
-      padding: '28px 24px',
-      boxShadow: '0 20px 50px rgba(0,0,0,0.6), 0 0 35px rgba(79, 214, 208, 0.25)',
+      padding: '28px 22px',
+      boxShadow: '0 20px 50px rgba(0,0,0,0.8), 0 0 40px rgba(79, 214, 208, 0.25)',
       color: '#fff',
       textAlign: 'center',
-      userSelect: 'none'
+      animation: 'slideUp 0.3s ease-out'
     }}>
-      <div style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#4fd6d0', marginBottom: '8px' }}>
-        {planet.theme}
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        fontSize: '11px',
+        letterSpacing: '3px',
+        textTransform: 'uppercase',
+        color: '#4fd6d0',
+        marginBottom: '6px'
+      }}>
+        <Palette size={13} />
+        <span>Pooja's Creative Sanctuary</span>
       </div>
-      <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '28px', fontWeight: 600, color: '#fff4e0', marginBottom: '8px' }}>
-        {planet.payload.title || planet.name}
+
+      <h2 style={{
+        fontFamily: 'Cormorant Garamond, serif',
+        fontSize: '28px',
+        fontWeight: 600,
+        color: '#fff4e0',
+        marginBottom: '6px'
+      }}>
+        Music & Canvas
       </h2>
-      <p style={{ fontSize: '12px', color: '#9cf0ec', marginBottom: '20px' }}>
-        (Drag horizontally to explore the 360° view)
+
+      <p style={{
+        fontFamily: 'Caveat, cursive',
+        fontSize: '18px',
+        color: '#a5f3fc',
+        marginBottom: '20px'
+      }}>
+        A world made for your art, playlists, and quiet peace ✨
       </p>
 
-      {/* Interactive 360 Panorama Viewport */}
-      <div
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        style={{
-          height: '180px',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          position: 'relative',
-          cursor: 'grab',
-          background: 'radial-gradient(ellipse at bottom, #0d2b45 0%, #070817 100%)',
-          marginBottom: '20px',
-          border: '1px solid rgba(79, 214, 208, 0.2)'
-        }}
-      >
+      {/* Interactive Art Card */}
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(79, 214, 208, 0.35)',
+        borderRadius: '20px',
+        padding: '24px 20px',
+        marginBottom: '20px',
+        position: 'relative',
+        minHeight: '180px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        <div style={{ fontSize: '36px', marginBottom: '10px' }}>
+          {active.icon}
+        </div>
+
         <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          transform: `translateX(${panX}px)`,
-          transition: isDraggingRef.current ? 'none' : 'transform 0.1s ease-out'
+          display: 'inline-block',
+          fontSize: '10px',
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
+          color: '#4fd6d0',
+          background: 'rgba(79, 214, 208, 0.15)',
+          padding: '3px 10px',
+          borderRadius: '10px',
+          marginBottom: '8px'
         }}>
-          {/* Repeating panoramic scene elements */}
-          {[-1, 0, 1].map((offset) => (
-            <div key={offset} style={{
-              minWidth: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'space-around',
-              paddingBottom: '20px'
-            }}>
-              <div style={{ fontSize: '38px', filter: 'drop-shadow(0 0 10px #4fd6d0)' }}>🌙</div>
-              <div style={{ fontSize: '28px', filter: 'drop-shadow(0 0 8px #ffd48a)' }}>✨</div>
-              <div style={{ fontSize: '36px', filter: 'drop-shadow(0 0 12px #ff5fb7)' }}>🏮</div>
-              <div style={{ fontSize: '30px', filter: 'drop-shadow(0 0 8px #9cf0ec)' }}>☕</div>
-              <div style={{ fontSize: '32px', filter: 'drop-shadow(0 0 10px #fff4e0)' }}>🌌</div>
-            </div>
+          {active.tag}
+        </div>
+
+        <h3 style={{
+          fontFamily: 'Cormorant Garamond, serif',
+          fontSize: '22px',
+          color: '#fff4e0',
+          marginBottom: '10px'
+        }}>
+          {active.title}
+        </h3>
+
+        <p style={{
+          fontFamily: 'Caveat, cursive',
+          fontSize: '20px',
+          color: '#e0f2fe',
+          lineHeight: 1.45,
+          maxWidth: '360px'
+        }}>
+          "{active.text}"
+        </p>
+
+        {/* Carousel indicator dots */}
+        <div style={{ display: 'flex', gap: '6px', marginTop: '16px' }}>
+          {artPieces.map((_, idx) => (
+            <div
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              style={{
+                width: idx === currentSlide ? '18px' : '6px',
+                height: '6px',
+                borderRadius: '3px',
+                backgroundColor: idx === currentSlide ? '#4fd6d0' : 'rgba(255,255,255,0.2)',
+                cursor: 'pointer',
+                transition: 'all 0.25s ease'
+              }}
+            />
           ))}
         </div>
       </div>
 
-      <p style={{ fontFamily: 'Caveat, cursive', fontSize: '20px', color: '#e0e7ff', lineHeight: 1.4, marginBottom: '24px' }}>
-        "{planet.payload.vibe}"
-      </p>
+      {/* Navigation Buttons */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+        <button
+          onClick={handlePrev}
+          style={{
+            flex: 1,
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            color: '#e0f2fe',
+            padding: '10px',
+            borderRadius: '16px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            fontSize: '12px'
+          }}
+        >
+          <ChevronLeft size={16} />
+          <span>Previous</span>
+        </button>
+
+        <button
+          onClick={handleNext}
+          style={{
+            flex: 1,
+            background: 'rgba(79, 214, 208, 0.2)',
+            border: '1px solid rgba(79, 214, 208, 0.4)',
+            color: '#a5f3fc',
+            padding: '10px',
+            borderRadius: '16px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            fontSize: '12px',
+            fontWeight: 500
+          }}
+        >
+          <span>Next Piece</span>
+          <ChevronRight size={16} />
+        </button>
+      </div>
 
       <button
-        onClick={onClose}
+        onClick={handleClose}
         style={{
-          background: 'linear-gradient(135deg, rgba(79,214,208,0.3), rgba(123,92,255,0.4))',
-          border: '1px solid rgba(255,255,255,0.2)',
+          background: 'rgba(255, 255, 255, 0.06)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
           color: '#fff',
           padding: '10px 24px',
           borderRadius: '20px',
           cursor: 'pointer',
-          fontSize: '14px',
-          fontFamily: 'inherit'
+          fontSize: '13px',
+          fontFamily: 'inherit',
+          transition: 'all 0.2s ease',
+          width: '100%'
         }}
       >
-        Back to Orbit
+        Back to Galaxy View 🌌
       </button>
+
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };

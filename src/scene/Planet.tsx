@@ -47,9 +47,9 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
     }
   }, [planet.id]);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (sphereRef.current) {
-      sphereRef.current.rotation.y += delta * 0.15;
+      sphereRef.current.rotation.y += delta * 0.18;
     }
     if (atmosphereRef.current) {
       atmosphereRef.current.rotation.y -= delta * 0.08;
@@ -57,13 +57,33 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
     if (ringRef.current) {
       ringRef.current.rotation.z += delta * 0.04;
     }
+    // Subtle real-time orbital drift along 3D elliptical track
+    if (groupRef.current) {
+      const time = state.clock.getElapsedTime() * 0.025;
+      const [bx, by, bz] = planet.position;
+      const initialAngle = Math.atan2(bz, bx);
+      const currentAngle = initialAngle + time;
+      const r = Math.sqrt(bx * bx + bz * bz);
+      groupRef.current.position.x = Math.cos(currentAngle) * r;
+      groupRef.current.position.z = Math.sin(currentAngle) * r;
+      groupRef.current.position.y = by + Math.sin(time * 2.0) * 0.6;
+    }
   });
 
   const handleClick = (e: any) => {
     e.stopPropagation();
     audioManager.playWhoosh();
     audioManager.playChime(523.25);
-    setCameraFocusPos(planet.position);
+    if (groupRef.current) {
+      const pos: [number, number, number] = [
+        groupRef.current.position.x,
+        groupRef.current.position.y,
+        groupRef.current.position.z,
+      ];
+      setCameraFocusPos(pos);
+    } else {
+      setCameraFocusPos(planet.position);
+    }
     setFocusedTarget({ type: 'planet', id: planet.id });
   };
 
@@ -156,8 +176,6 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
           />
         </mesh>
       )}
-
-      {/* NOTE: Names above planets REMOVED per user request for realism! */}
     </group>
   );
 };

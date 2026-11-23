@@ -15,6 +15,7 @@ import { MemoryStar } from './scene/MemoryStar';
 import { BirthdayStar } from './scene/BirthdayStar';
 import { Constellation } from './scene/Constellation';
 import { Planet } from './scene/Planet';
+import { OrbitPaths } from './scene/OrbitPaths';
 import { ShootingStar } from './scene/ShootingStar';
 import { HiddenStar } from './scene/HiddenStar';
 import { CameraRig } from './scene/CameraRig';
@@ -154,6 +155,7 @@ export const App: React.FC = () => {
           {(stage === 'explore' || stage === 'finale') && (
             <>
               <Constellation />
+              <OrbitPaths />
 
               {/* Interactive Memory Stars */}
               {MEMORIES.map((m) => (
@@ -196,7 +198,7 @@ export const App: React.FC = () => {
       {/* Stage: Finale Message */}
       {stage === 'finale' && <Finale />}
 
-      {/* Active Modal Overlay (Memory, Planet, Birthday, or Easter Egg) */}
+      {/* Active 3D Inspection Overlay (Card sits elegantly beside the rotating 3D world) */}
       {focusedTarget && (
         <div
           onClick={handleCloseModal}
@@ -206,11 +208,11 @@ export const App: React.FC = () => {
             zIndex: 70,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(7, 8, 23, 0.72)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            padding: '20px'
+            justifyContent: window.innerWidth > 768 ? 'flex-end' : 'center',
+            background: 'rgba(5, 4, 15, 0.45)',
+            backdropFilter: 'blur(5px)',
+            WebkitBackdropFilter: 'blur(5px)',
+            padding: window.innerWidth > 768 ? '32px 48px' : '16px'
           }}
         >
           <div onClick={(e) => e.stopPropagation()}>

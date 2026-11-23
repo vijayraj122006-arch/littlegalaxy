@@ -113,7 +113,7 @@ export const FirstMeeting: React.FC<Props> = ({ planet, onClose }) => {
           transition: 'all 0.2s'
         }}
       >
-        Close Planet
+        Back to Galaxy View 🌌
       </button>
     </div>
   );

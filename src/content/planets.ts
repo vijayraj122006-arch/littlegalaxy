@@ -21,45 +21,30 @@ export type PlanetDef = {
 export const PLANETS: PlanetDef[] = [
   {
     id: "planet-first-meeting",
-    name: "The Origin",
-    theme: "First Meeting",
-    description: "The day we started talking — scrub through time to see how the spark began.",
+    name: "The Red Moon",
+    theme: "Where It All Began",
+    description: "The story reply that started everything — scrub through the night.",
     position: [12, 3, -10],
     color: "#ff5fb7",
     glowColor: "#ff90d4",
     size: 1.6,
     component: "FirstMeeting",
     payload: {
-      title: "Where It Began",
-      date: "11 November 2026",
+      title: "The Eclipse That Started A Universe",
+      date: "08 September 2025",
       stages: [
-        { time: "Day 0", text: "Two paths crossing in a quiet corner of the digital world." },
-        { time: "First Message", text: "A simple hello that unexpectedly turned into hours of banter." },
-        { time: "Midnight", text: "Realizing neither of us wanted to say goodnight just yet." },
-        { time: "Now", text: "Now here you are, exploring your very own little universe." }
+        { time: "The Story", text: "Vijay posts a story of the red eclipse moon..." },
+        { time: "Pooja replies", text: "'Aadha pakka kudadu... negative energy transfer aagum nu yage Amma yanna madi ke mudiyala!'" },
+        { time: "Vijay", text: "'Idu garano ila 😉'" },
+        { time: "11 Nov 2026", text: "A superstitious warning turned into late night talks, laughter, and now your own galaxy." }
       ]
-    }
-  },
-  {
-    id: "planet-favorite-place",
-    name: "The Sanctuary",
-    theme: "Favorite Place",
-    description: "A serene spot that feels warm and timeless — look around and breathe.",
-    position: [-14, 5, -8],
-    color: "#4fd6d0",
-    glowColor: "#9cf0ec",
-    size: 1.8,
-    component: "FavoritePlace",
-    payload: {
-      title: "Under The Canopy of Stars",
-      vibe: "A quiet rooftop under a cool night breeze, warm cups in hand, where the noise of the busy world fades into comfortable peace."
     }
   },
   {
     id: "planet-inside-joke",
     name: "Silly Moon",
-    theme: "Inside Jokes",
-    description: "Things only we smile at — tap through the punchlines.",
+    theme: "Our Inside Jokes",
+    description: "Things only we laugh at — tap through the punchlines.",
     position: [8, -8, 8],
     color: "#ffd48a",
     glowColor: "#ffe6b8",
@@ -68,18 +53,33 @@ export const PLANETS: PlanetDef[] = [
     payload: {
       jokes: [
         {
-          setup: "Why did we stay up so late talking?",
-          punchline: "Because sleep is overrated when the conversation is this good."
+          setup: "Wait... is Vijay nonchalant?",
+          punchline: "She thought I was nonchalant. Then I told her I'm completely different around her... and she confessed she loves expressive people!"
         },
         {
-          setup: "Official law of our banter:",
-          punchline: "The more random the topic, the faster two hours disappear."
+          setup: "What happens when Vijay has a hackathon after an exam?",
+          punchline: "Pooja: 'BROOO SEEN ZONE ME 💀😭!'"
         },
         {
-          setup: "Who is the cooler person in this universe?",
-          punchline: "You, hands down! (Vijay is still taking notes 😉)"
+          setup: "Shall we go for a chocolate chip cookie taste test?",
+          punchline: "Pooja: 'KANDIPAAAA! 🍪✨'"
         }
       ]
+    }
+  },
+  {
+    id: "planet-favorite-place",
+    name: "Music & Canvas",
+    theme: "Our Vibe",
+    description: "A sanctuary of Harris Jayaraj melodies, sketchbooks, and cozy tea.",
+    position: [-14, 5, -8],
+    color: "#4fd6d0",
+    glowColor: "#9cf0ec",
+    size: 1.8,
+    component: "FavoritePlace",
+    payload: {
+      title: "Mundhinam Paartheney & Sketchbooks",
+      vibe: "Losing track of time listening to Harris Jayaraj, trading reels, sharing Pinterest art inspirations, and smiling at dancing cat stickers."
     }
   }
 ];

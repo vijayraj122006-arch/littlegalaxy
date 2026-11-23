@@ -100,7 +100,7 @@ export const Progress: React.FC = () => {
           {/* Song button */}
           <button
             onClick={handleOpenSong}
-            title="Listen to Mudhal Mazhai"
+            title="Listen to Mundhinam Paartheney"
             style={{
               background: 'rgba(13, 11, 46, 0.72)',
               backdropFilter: 'blur(12px)',
@@ -116,7 +116,7 @@ export const Progress: React.FC = () => {
             }}
           >
             <Music size={14} />
-            <span style={{ display: 'none', md: 'inline' } as any}>Mudhal Mazhai</span>
+            <span style={{ display: 'none', md: 'inline' } as any}>Mundhinam Paartheney</span>
           </button>
 
           {needsPermissionButton && (

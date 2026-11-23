@@ -1,6 +1,7 @@
 import React from 'react';
 import { Memory } from '../content/memories';
 import { audioSynth } from '../utils/audioSynth';
+import { Heart } from 'lucide-react';
 
 interface Props {
   memory: Memory;
@@ -13,28 +14,32 @@ export const MemoryCard: React.FC<Props> = ({ memory, onClose }) => {
     onClose();
   };
 
+  const isScreenshot = memory.photo?.endsWith('.jpg') || memory.photo?.endsWith('.png');
+
   return (
     <div style={{
       maxWidth: '430px',
       width: '90vw',
-      background: 'rgba(13, 11, 46, 0.9)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
+      background: 'rgba(15, 10, 36, 0.94)',
+      backdropFilter: 'blur(24px)',
+      WebkitBackdropFilter: 'blur(24px)',
       border: `1px solid ${memory.color}55`,
       borderRadius: '24px',
-      padding: '24px',
-      boxShadow: `0 20px 50px rgba(0,0,0,0.65), 0 0 35px ${memory.color}25`,
+      padding: '24px 20px',
+      boxShadow: `0 20px 50px rgba(0,0,0,0.7), 0 0 35px ${memory.color}25`,
       color: '#fff',
       position: 'relative',
-      textAlign: 'center'
+      textAlign: 'center',
+      maxHeight: '88vh',
+      overflowY: 'auto'
     }}>
-      {/* Memory Artwork / SVG Graphic */}
+      {/* Memory Photo / Artwork */}
       <div style={{
         width: '100%',
-        height: '180px',
+        height: isScreenshot ? '240px' : '170px',
         borderRadius: '16px',
         overflow: 'hidden',
-        background: `radial-gradient(circle at center, ${memory.color}33 0%, rgba(7, 8, 23, 0.9) 100%)`,
+        background: `radial-gradient(circle at center, ${memory.color}25 0%, rgba(5, 4, 16, 0.95) 100%)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -52,7 +57,7 @@ export const MemoryCard: React.FC<Props> = ({ memory, onClose }) => {
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover'
+              objectFit: isScreenshot ? 'contain' : 'cover'
             }}
           />
         )}
@@ -60,18 +65,21 @@ export const MemoryCard: React.FC<Props> = ({ memory, onClose }) => {
 
       {/* Tag / Category Badge */}
       <div style={{
-        display: 'inline-block',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
         fontSize: '11px',
         letterSpacing: '2px',
         textTransform: 'uppercase',
         color: memory.color,
         background: `${memory.color}15`,
         border: `1px solid ${memory.color}44`,
-        padding: '3px 12px',
-        borderRadius: '12px',
+        padding: '4px 14px',
+        borderRadius: '14px',
         marginBottom: '10px'
       }}>
-        {memory.tag} {memory.date ? `• ${memory.date}` : ''}
+        <Heart size={11} fill={memory.color} color={memory.color} />
+        <span>{memory.tag} {memory.date ? `• ${memory.date}` : ''}</span>
       </div>
 
       <h2 style={{
@@ -79,7 +87,7 @@ export const MemoryCard: React.FC<Props> = ({ memory, onClose }) => {
         fontSize: '28px',
         fontWeight: 600,
         color: '#fff4e0',
-        marginBottom: '14px',
+        marginBottom: '12px',
         letterSpacing: '0.5px'
       }}>
         {memory.title}
@@ -90,7 +98,7 @@ export const MemoryCard: React.FC<Props> = ({ memory, onClose }) => {
         fontSize: '22px',
         color: '#f8fafc',
         lineHeight: 1.45,
-        marginBottom: '24px',
+        marginBottom: '22px',
         whiteSpace: 'pre-line'
       }}>
         "{memory.note}"

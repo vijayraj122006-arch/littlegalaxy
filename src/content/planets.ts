@@ -1,8 +1,7 @@
 export type PlanetComponentType =
   | "FirstMeeting"
   | "FavoritePlace"
-  | "InsideJoke"
-  | "Future"
+  | "Playlist"
   | "Song";
 
 export type PlanetDef = {
@@ -22,49 +21,36 @@ export const PLANETS: PlanetDef[] = [
   {
     id: "planet-first-meeting",
     name: "The Red Moon",
-    theme: "Where It All Began",
-    description: "The story reply that started everything — scrub through the night.",
+    theme: "Where It Began",
+    description: "The story reply that started everything — scrub through time.",
     position: [12, 3, -10],
     color: "#ff5fb7",
     glowColor: "#ff90d4",
     size: 1.6,
     component: "FirstMeeting",
     payload: {
-      title: "The Eclipse That Started A Universe",
+      title: "The Eclipse That Started Our Universe",
       date: "08 September 2025",
       stages: [
         { time: "The Story", text: "Vijay posts a story of the red eclipse moon..." },
         { time: "Pooja replies", text: "'Aadha pakka kudadu... negative energy transfer aagum nu yage Amma yanna madi ke mudiyala!'" },
         { time: "Vijay", text: "'Idu garano ila 😉'" },
-        { time: "11 Nov 2026", text: "A superstitious warning turned into late night talks, laughter, and now your own galaxy." }
+        { time: "11 Nov 2026", text: "A superstitious warning turned into late night talks, laughter, and now your own little galaxy." }
       ]
     }
   },
   {
-    id: "planet-inside-joke",
-    name: "Silly Moon",
-    theme: "Our Inside Jokes",
-    description: "Things only we laugh at — tap through the punchlines.",
+    id: "planet-playlist",
+    name: "Our Playlist",
+    theme: "Songs For You",
+    description: "Melodies that remind me of your voice and quiet evenings.",
     position: [8, -8, 8],
     color: "#ffd48a",
     glowColor: "#ffe6b8",
-    size: 1.5,
-    component: "InsideJoke",
+    size: 1.7,
+    component: "Playlist",
     payload: {
-      jokes: [
-        {
-          setup: "Wait... is Vijay nonchalant?",
-          punchline: "She thought I was nonchalant. Then I told her I'm completely different around her... and she confessed she loves expressive people!"
-        },
-        {
-          setup: "What happens when Vijay has a hackathon after an exam?",
-          punchline: "Pooja: 'BROOO SEEN ZONE ME 💀😭!'"
-        },
-        {
-          setup: "Shall we go for a chocolate chip cookie taste test?",
-          punchline: "Pooja: 'KANDIPAAAA! 🍪✨'"
-        }
-      ]
+      title: "Songs That Feel Like You",
     }
   },
   {

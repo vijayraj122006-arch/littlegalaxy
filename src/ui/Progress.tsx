@@ -1,5 +1,5 @@
-import React from 'react';
-import { Volume2, VolumeX, Sparkles, Compass, Music } from 'lucide-react';
+import React, { useState } from 'react';
+import { Volume2, VolumeX, Sparkles, Compass, Music, X } from 'lucide-react';
 import { useUniverse } from '../store/useUniverse';
 import { useAudio } from '../hooks/useAudio';
 import { useGyro } from '../hooks/useGyro';
@@ -15,6 +15,8 @@ export const Progress: React.FC = () => {
   const finaleUnlocked = useUniverse((s) => s.finaleUnlocked);
   const setWishPromptOpen = useUniverse((s) => s.setWishPromptOpen);
 
+  const [showPlayer, setShowPlayer] = useState(false);
+
   const { audioOn, toggle } = useAudio();
   const { needsPermissionButton, requestPermission } = useGyro();
 
@@ -22,10 +24,6 @@ export const Progress: React.FC = () => {
 
   const totalMemories = MEMORIES.length;
   const progressRatio = Math.min(1, visitedMemories.length / totalMemories);
-
-  const handleOpenSong = () => {
-    window.open(CONFIG.song.spotifyUrl, '_blank');
-  };
 
   return (
     <div style={{
@@ -51,7 +49,7 @@ export const Progress: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          background: 'rgba(13, 11, 46, 0.72)',
+          background: 'rgba(13, 11, 46, 0.75)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           border: '1px solid rgba(255, 255, 255, 0.12)',
@@ -73,7 +71,7 @@ export const Progress: React.FC = () => {
               cy="12"
               r="9"
               fill="none"
-              stroke="#ffd48a"
+              stroke="#ff5fb7"
               strokeWidth="2.2"
               strokeDasharray={56.5}
               strokeDashoffset={56.5 * (1 - progressRatio)}
@@ -82,41 +80,44 @@ export const Progress: React.FC = () => {
               style={{ transition: 'stroke-dashoffset 0.5s ease' }}
             />
           </svg>
-          <span style={{ fontSize: '12px', color: '#ffd48a', letterSpacing: '1px', fontWeight: 500 }}>
+          <span style={{ fontSize: '12px', color: '#fff4e0', letterSpacing: '1px', fontWeight: 500 }}>
             {visitedMemories.length} / {totalMemories} stars
           </span>
-          <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+          <span style={{ fontSize: '11px', color: '#c4b5fd' }}>
             • {visitedPlanets.length}/{PLANETS.length} worlds
           </span>
         </div>
 
-        {/* Action icons (Sound, Song link, Gyro) */}
+        {/* Action icons (Spotify Player Toggle, Sound, Gyro) */}
         <div style={{
           pointerEvents: 'auto',
           display: 'flex',
           alignItems: 'center',
           gap: '8px'
         }}>
-          {/* Song button */}
+          {/* Mudhal Mazhai Player Toggle */}
           <button
-            onClick={handleOpenSong}
-            title="Listen to Mundhinam Paartheney"
+            onClick={() => setShowPlayer(!showPlayer)}
+            title="Play Mudhal Mazhai"
             style={{
-              background: 'rgba(13, 11, 46, 0.72)',
+              background: showPlayer ? 'rgba(29, 185, 84, 0.35)' : 'rgba(13, 11, 46, 0.75)',
               backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(110, 231, 183, 0.35)',
+              border: showPlayer ? '1px solid #1DB954' : '1px solid rgba(255, 255, 255, 0.18)',
               borderRadius: '20px',
-              padding: '6px 12px',
+              padding: '6px 14px',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              color: '#6ee7b7',
+              color: showPlayer ? '#1DB954' : '#6ee7b7',
               fontSize: '12px',
-              cursor: 'pointer'
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: showPlayer ? '0 0 15px rgba(29, 185, 84, 0.4)' : 'none'
             }}
           >
             <Music size={14} />
-            <span style={{ display: 'none', md: 'inline' } as any}>Mundhinam Paartheney</span>
+            <span>Mudhal Mazhai</span>
           </button>
 
           {needsPermissionButton && (
@@ -124,7 +125,7 @@ export const Progress: React.FC = () => {
               onClick={requestPermission}
               title="Enable phone tilt parallax"
               style={{
-                background: 'rgba(13, 11, 46, 0.72)',
+                background: 'rgba(13, 11, 46, 0.75)',
                 backdropFilter: 'blur(12px)',
                 border: '1px solid rgba(79, 214, 208, 0.4)',
                 borderRadius: '50%',
@@ -144,9 +145,9 @@ export const Progress: React.FC = () => {
           {/* Audio Mute/Unmute */}
           <button
             onClick={toggle}
-            title={audioOn ? "Mute sound" : "Turn sound on"}
+            title={audioOn ? "Mute synth ambient" : "Turn synth ambient on"}
             style={{
-              background: 'rgba(13, 11, 46, 0.72)',
+              background: 'rgba(13, 11, 46, 0.75)',
               backdropFilter: 'blur(12px)',
               border: '1px solid rgba(255, 255, 255, 0.15)',
               borderRadius: '50%',
@@ -164,6 +165,59 @@ export const Progress: React.FC = () => {
         </div>
       </div>
 
+      {/* Floating Embedded Spotify Player Card */}
+      {showPlayer && (
+        <div style={{
+          pointerEvents: 'auto',
+          alignSelf: 'flex-end',
+          maxWidth: '340px',
+          width: '92%',
+          background: 'rgba(13, 11, 46, 0.95)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(29, 185, 84, 0.45)',
+          borderRadius: '20px',
+          padding: '12px',
+          boxShadow: '0 12px 35px rgba(0,0,0,0.6), 0 0 25px rgba(29, 185, 84, 0.25)',
+          marginTop: '10px',
+          position: 'relative',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '8px',
+            padding: '0 4px'
+          }}>
+            <span style={{ fontSize: '11px', color: '#1DB954', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 600 }}>
+              Our Song
+            </span>
+            <button
+              onClick={() => setShowPlayer(false)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <iframe
+            src={CONFIG.song.spotifyEmbedUrl}
+            width="100%"
+            height="152"
+            frameBorder="0"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            title="Spotify Embed"
+            style={{ borderRadius: '12px', display: 'block' }}
+          />
+        </div>
+      )}
+
       {/* Bottom Floating Bar */}
       <div style={{
         display: 'flex',
@@ -177,12 +231,12 @@ export const Progress: React.FC = () => {
           onClick={() => setWishPromptOpen(true)}
           style={{
             pointerEvents: 'auto',
-            background: 'rgba(13, 11, 46, 0.8)',
+            background: 'rgba(13, 11, 46, 0.85)',
             backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 212, 138, 0.4)',
+            border: '1px solid rgba(255, 95, 183, 0.4)',
             borderRadius: '24px',
             padding: '10px 22px',
-            color: '#ffd48a',
+            color: '#fff4e0',
             fontSize: '13px',
             fontWeight: 500,
             display: 'flex',
@@ -193,7 +247,7 @@ export const Progress: React.FC = () => {
             transition: 'all 0.2s ease'
           }}
         >
-          <Sparkles size={15} />
+          <Sparkles size={15} color="#ff5fb7" />
           <span>Make a wish</span>
         </button>
 
@@ -228,6 +282,10 @@ export const Progress: React.FC = () => {
         @keyframes glowPulse {
           0% { box-shadow: 0 0 15px rgba(255, 95, 183, 0.4); transform: scale(1); }
           100% { box-shadow: 0 0 30px rgba(255, 212, 138, 0.7); transform: scale(1.04); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>

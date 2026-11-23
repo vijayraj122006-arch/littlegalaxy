@@ -22,9 +22,7 @@ import { Effects } from './scene/Effects';
 // Planet Mini-Interactions
 import { FirstMeeting } from './planets/FirstMeeting';
 import { FavoritePlace } from './planets/FavoritePlace';
-import { InsideJoke } from './planets/InsideJoke';
-import { Future } from './planets/Future';
-import { SongPlanet } from './planets/SongPlanet';
+import { PlaylistPlanet } from './planets/PlaylistPlanet';
 
 // UI Overlays
 import { PasswordGate } from './ui/PasswordGate';
@@ -220,16 +218,8 @@ export const App: React.FC = () => {
               <FavoritePlace planet={activePlanet} onClose={handleCloseModal} />
             )}
 
-            {activePlanet && activePlanet.component === 'InsideJoke' && (
-              <InsideJoke planet={activePlanet} onClose={handleCloseModal} />
-            )}
-
-            {activePlanet && activePlanet.component === 'Future' && (
-              <Future planet={activePlanet} onClose={handleCloseModal} />
-            )}
-
-            {activePlanet && activePlanet.component === 'Song' && (
-              <SongPlanet planet={activePlanet} onClose={handleCloseModal} />
+            {activePlanet && activePlanet.component === 'Playlist' && (
+              <PlaylistPlanet planet={activePlanet} onClose={handleCloseModal} />
             )}
 
             {focusedTarget.type === 'birthday' && (

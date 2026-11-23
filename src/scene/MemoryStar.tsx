@@ -151,6 +151,7 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
         center
         position={[0, 1.6 * baseScale, 0]}
         distanceFactor={24}
+        zIndexRange={[10, 0]}
         style={{
           pointerEvents: 'none',
           userSelect: 'none',

@@ -137,6 +137,7 @@ export const BirthdayStar: React.FC = () => {
         center
         position={[0, 2.0, 0]}
         distanceFactor={24}
+        zIndexRange={[10, 0]}
         style={{
           pointerEvents: 'none',
           userSelect: 'none',

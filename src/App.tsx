@@ -149,26 +149,32 @@ export const App: React.FC = () => {
           <Nebula />
           <Starfield />
           <Galaxy />
-          <Constellation />
 
-          {/* Interactive Memory Stars */}
-          {MEMORIES.map((m) => (
-            <MemoryStar key={m.id} memory={m} />
-          ))}
+          {/* Interactive elements active only during explore and finale stages */}
+          {(stage === 'explore' || stage === 'finale') && (
+            <>
+              <Constellation />
 
-          {/* Special Birthday Star (17 Nov) */}
-          <BirthdayStar />
+              {/* Interactive Memory Stars */}
+              {MEMORIES.map((m) => (
+                <MemoryStar key={m.id} memory={m} />
+              ))}
 
-          {/* Orbiting Worlds / Planets */}
-          {PLANETS.map((p) => (
-            <Planet key={p.id} planet={p} />
-          ))}
+              {/* Special Birthday Star (17 Nov) */}
+              <BirthdayStar />
 
-          {/* Secret Easter Egg Hidden Star */}
-          <HiddenStar />
+              {/* Orbiting Worlds / Planets */}
+              {PLANETS.map((p) => (
+                <Planet key={p.id} planet={p} />
+              ))}
 
-          {/* Shooting Stars */}
-          <ShootingStar />
+              {/* Secret Easter Egg Hidden Star */}
+              <HiddenStar />
+
+              {/* Shooting Stars */}
+              <ShootingStar />
+            </>
+          )}
 
           {/* Post Processing Effects */}
           <Effects />

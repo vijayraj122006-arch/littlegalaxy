@@ -96,6 +96,7 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
         center
         position={[0, planetRadius * 1.8, 0]}
         distanceFactor={28}
+        zIndexRange={[10, 0]}
         style={{
           pointerEvents: 'none',
           userSelect: 'none',

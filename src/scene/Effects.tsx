@@ -2,7 +2,7 @@ import React from 'react';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import { useUniverse } from '../store/useUniverse';
-import { prefersReducedMotion } from '../utils/device';
+import { prefersReducedMotion, isMobileDevice } from '../utils/device';
 
 class PostprocessingErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -27,14 +27,20 @@ class PostprocessingErrorBoundary extends React.Component<
 export const Effects: React.FC = () => {
   const isLowQuality = useUniverse((s) => s.isLowQuality);
   const reducedMotion = prefersReducedMotion();
+  const isMobile = isMobileDevice();
+
+  // On mobile or low quality devices, bypass postprocessing passes for locked 60 FPS
+  if (isMobile || isLowQuality || reducedMotion) {
+    return null;
+  }
 
   return (
     <PostprocessingErrorBoundary>
       <EffectComposer multisampling={0}>
         <Bloom
-          luminanceThreshold={0.4}
+          luminanceThreshold={0.45}
           luminanceSmoothing={0.3}
-          intensity={isLowQuality || reducedMotion ? 0.6 : 0.85}
+          intensity={0.7}
           mipmapBlur
         />
         <Vignette

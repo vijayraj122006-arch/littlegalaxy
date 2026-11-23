@@ -13,7 +13,7 @@ interface MemoryStarProps {
 export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
   const meshRef = useRef<THREE.Group>(null);
   const haloRef = useRef<THREE.Mesh>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
+  const flareRef = useRef<THREE.Mesh>(null);
   
   const visitedMemories = useUniverse((s) => s.visitedMemories);
   const isVisited = visitedMemories.includes(memory.id);
@@ -26,17 +26,16 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
   const holdTimerRef = useRef<number | null>(null);
 
   const color = new THREE.Color(memory.color);
-  const baseScale = isVisited ? 1.25 : 1.05;
+  const baseScale = isVisited ? 1.2 : 0.95;
 
   useFrame((state, delta) => {
     if (haloRef.current) {
-      const t = state.clock.getElapsedTime() * 2.2 + memory.position[0];
-      const pulse = Math.sin(t) * 0.18 + 1.1;
+      const t = state.clock.getElapsedTime() * 2.5 + memory.position[0];
+      const pulse = Math.sin(t) * 0.15 + 1.05;
       haloRef.current.scale.setScalar((hovered ? 1.4 : 1.0) * pulse * baseScale);
     }
-
-    if (ringRef.current) {
-      ringRef.current.rotation.z += delta * 1.2;
+    if (flareRef.current) {
+      flareRef.current.rotation.z += delta * 0.4;
     }
   });
 
@@ -55,7 +54,7 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
 
     if (memory.interaction === 'hold' && !isVisited) {
       let start = performance.now();
-      const duration = 1000;
+      const duration = 900;
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         try { navigator.vibrate(25); } catch {}
       }
@@ -97,46 +96,42 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      {/* Central Radiant White Star Core */}
+      {/* 1. Brilliant Point Star Core */}
       <mesh>
-        <sphereGeometry args={[0.5 * baseScale, 24, 24]} />
-        <meshBasicMaterial
-          color="#ffffff"
-          toneMapped={false}
-        />
+        <sphereGeometry args={[0.38 * baseScale, 20, 20]} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
       </mesh>
 
-      {/* Atmospheric Glowing Corona */}
+      {/* 2. Soft Coronal Glow Sphere */}
       <mesh ref={haloRef}>
-        <sphereGeometry args={[1.15 * baseScale, 24, 24]} />
+        <sphereGeometry args={[0.9 * baseScale, 20, 20]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={isVisited ? 0.7 : (hovered ? 0.85 : 0.5)}
+          opacity={isVisited ? 0.75 : (hovered ? 0.9 : 0.45)}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
         />
       </mesh>
 
-      {/* Delicate Star Ring */}
-      <mesh ref={ringRef} rotation={[Math.PI / 3, Math.PI / 4, 0]}>
-        <ringGeometry args={[1.05 * baseScale, 1.25 * baseScale, 32]} />
+      {/* 3. Astronomical 4-Point Diffraction Flare Cross */}
+      <mesh ref={flareRef}>
+        <planeGeometry args={[2.4 * baseScale, 2.4 * baseScale]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.6}
+          opacity={hovered ? 0.8 : (isVisited ? 0.5 : 0.3)}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
           side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          toneMapped={false}
         />
       </mesh>
 
-      {/* Charging hold ring */}
+      {/* 4. Charging Hold Ring for future stars */}
       {holdProgress > 0 && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.2, 1.5, 32]} />
+          <ringGeometry args={[1.0, 1.3, 32]} />
           <meshBasicMaterial
             color="#ffd48a"
             transparent
@@ -148,35 +143,33 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
         </mesh>
       )}
 
-      {/* Clean, Non-Suspending Frosted Starlight Badge */}
-      <Html
-        center
-        position={[0, 1.6 * baseScale, 0]}
-        distanceFactor={28}
-        zIndexRange={[10, 0]}
-        style={{
-          pointerEvents: 'none',
-          userSelect: 'none',
-          whiteSpace: 'nowrap',
-          color: '#ffffff',
-          fontFamily: 'Plus Jakarta Sans, sans-serif',
-          fontSize: '12px',
-          fontWeight: 600,
-          letterSpacing: '0.5px',
-          textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 10px rgba(255,255,255,0.6)',
-          background: 'rgba(8, 7, 24, 0.72)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          padding: '3px 10px',
-          borderRadius: '12px',
-          border: `1px solid ${memory.color}88`,
-          boxShadow: `0 2px 10px rgba(0,0,0,0.5), 0 0 12px ${memory.color}22`,
-          transform: hovered ? 'scale(1.15)' : 'scale(1)',
-          transition: 'transform 0.2s ease',
-        }}
-      >
-        ✨ {memory.title}
-      </Html>
+      {/* 5. Minimal, Elegant Label (Only visible when hovered or focused, keeping sky realistic) */}
+      {hovered && (
+        <Html
+          center
+          position={[0, 1.4 * baseScale, 0]}
+          distanceFactor={26}
+          zIndexRange={[10, 0]}
+          style={{
+            pointerEvents: 'none',
+            userSelect: 'none',
+            whiteSpace: 'nowrap',
+            color: '#fff',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
+            fontSize: '12px',
+            fontWeight: 600,
+            letterSpacing: '0.5px',
+            background: 'rgba(10, 8, 28, 0.85)',
+            backdropFilter: 'blur(10px)',
+            padding: '4px 10px',
+            borderRadius: '12px',
+            border: `1px solid ${memory.color}aa`,
+            boxShadow: `0 4px 15px rgba(0,0,0,0.6), 0 0 15px ${memory.color}44`,
+          }}
+        >
+          ✨ {memory.title}
+        </Html>
+      )}
     </group>
   );
 };

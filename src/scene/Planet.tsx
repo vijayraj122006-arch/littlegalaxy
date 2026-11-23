@@ -1,14 +1,22 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { PlanetDef } from '../content/planets';
 import { useUniverse } from '../store/useUniverse';
 import { audioManager } from '../utils/audioManager';
+import {
+  getMoonTexture,
+  getGasGiantTexture,
+  getIceGiantTexture,
+} from '../utils/planetTextures';
 
 interface PlanetProps {
   planet: PlanetDef;
 }
+
+type MoonTextures = { type: 'moon'; map: THREE.CanvasTexture; bump: THREE.CanvasTexture };
+type RingedTextures = { type: 'gas' | 'ice'; map: THREE.CanvasTexture; ring: THREE.CanvasTexture };
+type PlanetTextures = MoonTextures | RingedTextures;
 
 export const Planet: React.FC<PlanetProps> = ({ planet }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -23,20 +31,31 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
   const setFocusedTarget = useUniverse((s) => s.setFocusedTarget);
   const setCameraFocusPos = useUniverse((s) => s.setCameraFocusPos);
 
-  const color = new THREE.Color(planet.color);
-  const glowColor = new THREE.Color(planet.glowColor);
-  const planetRadius = planet.size;
+  const planetRadius = planet.size * 1.1;
+
+  // Load procedural textures for realistic planet look
+  const textures = useMemo<PlanetTextures>(() => {
+    if (planet.id === 'planet-first-meeting') {
+      const data = getMoonTexture();
+      return { type: 'moon', map: data.map, bump: data.bump };
+    } else if (planet.id === 'planet-playlist') {
+      const data = getGasGiantTexture();
+      return { type: 'gas', map: data.map, ring: data.ring };
+    } else {
+      const data = getIceGiantTexture();
+      return { type: 'ice', map: data.map, ring: data.ring };
+    }
+  }, [planet.id]);
 
   useFrame((_, delta) => {
     if (sphereRef.current) {
-      sphereRef.current.rotation.y += delta * 0.25;
-      sphereRef.current.rotation.x += delta * 0.04;
+      sphereRef.current.rotation.y += delta * 0.15;
     }
     if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y -= delta * 0.15;
+      atmosphereRef.current.rotation.y -= delta * 0.08;
     }
     if (ringRef.current) {
-      ringRef.current.rotation.z += delta * 0.08;
+      ringRef.current.rotation.z += delta * 0.04;
     }
   });
 
@@ -48,6 +67,8 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
     setFocusedTarget({ type: 'planet', id: planet.id });
   };
 
+  const glowColor = new THREE.Color(planet.glowColor);
+
   return (
     <group
       ref={groupRef}
@@ -55,26 +76,49 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
       onClick={handleClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
+      scale={hovered ? 1.08 : 1.0}
     >
-      {/* 3D Planet Core */}
+      {/* 1. Realistic 3D Planet Surface Sphere */}
       <mesh ref={sphereRef}>
         <sphereGeometry args={[planetRadius, 48, 48]} />
-        <meshStandardMaterial
-          color={color}
-          roughness={0.45}
-          metalness={0.2}
-          emissive={color}
-          emissiveIntensity={hovered ? 0.65 : (isVisited ? 0.45 : 0.3)}
-        />
+        {textures.type === 'moon' && (
+          <meshStandardMaterial
+            map={textures.map}
+            bumpMap={textures.bump}
+            bumpScale={0.06}
+            roughness={0.85}
+            metalness={0.1}
+            emissive={new THREE.Color('#38070d')}
+            emissiveIntensity={hovered ? 0.4 : 0.2}
+          />
+        )}
+        {textures.type === 'gas' && (
+          <meshStandardMaterial
+            map={textures.map}
+            roughness={0.4}
+            metalness={0.15}
+            emissive={new THREE.Color('#331d04')}
+            emissiveIntensity={hovered ? 0.35 : 0.15}
+          />
+        )}
+        {textures.type === 'ice' && (
+          <meshStandardMaterial
+            map={textures.map}
+            roughness={0.35}
+            metalness={0.25}
+            emissive={new THREE.Color('#031f3b')}
+            emissiveIntensity={hovered ? 0.4 : 0.18}
+          />
+        )}
       </mesh>
 
-      {/* Atmospheric Fresnel Glow Shell */}
+      {/* 2. Realistic Atmospheric Edge Glow (BackSide Fresnel Rim) */}
       <mesh ref={atmosphereRef}>
-        <sphereGeometry args={[planetRadius * 1.22, 36, 36]} />
+        <sphereGeometry args={[planetRadius * 1.15, 36, 36]} />
         <meshBasicMaterial
           color={glowColor}
           transparent
-          opacity={hovered ? 0.55 : 0.35}
+          opacity={hovered ? 0.55 : (isVisited ? 0.35 : 0.22)}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -82,61 +126,38 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
         />
       </mesh>
 
-      {/* Outer Ethereal Halo */}
+      {/* 3. Outer Ethereal Soft Corona */}
       <mesh>
-        <sphereGeometry args={[planetRadius * 1.45, 24, 24]} />
+        <sphereGeometry args={[planetRadius * 1.35, 24, 24]} />
         <meshBasicMaterial
-          color={color}
+          color={glowColor}
           transparent
-          opacity={hovered ? 0.25 : 0.12}
+          opacity={hovered ? 0.2 : 0.08}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
         />
       </mesh>
 
-      {/* Radiant Planetary Rings */}
-      <mesh ref={ringRef} rotation={[Math.PI / 3, Math.PI / 5, 0]}>
-        <ringGeometry args={[planetRadius * 1.5, planetRadius * 2.3, 64]} />
-        <meshBasicMaterial
-          color={glowColor}
-          transparent
-          opacity={hovered ? 0.65 : 0.45}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
+      {/* 4. Realistic Rings (for Gas Giant & Ice Giant) */}
+      {'ring' in textures && textures.ring && (
+        <mesh
+          ref={ringRef}
+          rotation={[Math.PI / 2.8, Math.PI / 6, 0]}
+        >
+          <ringGeometry args={[planetRadius * 1.4, planetRadius * 2.4, 64]} />
+          <meshBasicMaterial
+            map={textures.ring}
+            transparent
+            opacity={hovered ? 0.9 : 0.75}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
 
-      {/* Clean, Non-Suspending HTML Planet Label */}
-      <Html
-        center
-        position={[0, planetRadius * 1.9, 0]}
-        distanceFactor={32}
-        zIndexRange={[10, 0]}
-        style={{
-          pointerEvents: 'none',
-          userSelect: 'none',
-          whiteSpace: 'nowrap',
-          color: '#ffffff',
-          fontFamily: 'Plus Jakarta Sans, sans-serif',
-          fontSize: '13px',
-          fontWeight: 600,
-          letterSpacing: '0.8px',
-          textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.7)',
-          background: 'rgba(8, 7, 24, 0.78)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          padding: '4px 12px',
-          borderRadius: '14px',
-          border: `1px solid ${planet.color}aa`,
-          boxShadow: `0 4px 15px rgba(0,0,0,0.5), 0 0 15px ${planet.color}33`,
-          transform: hovered ? 'scale(1.15)' : 'scale(1)',
-          transition: 'transform 0.2s ease',
-        }}
-      >
-        🪐 {planet.name}
-      </Html>
+      {/* NOTE: Names above planets REMOVED per user request for realism! */}
     </group>
   );
 };

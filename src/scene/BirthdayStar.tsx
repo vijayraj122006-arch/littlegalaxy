@@ -10,6 +10,7 @@ export const BirthdayStar: React.FC = () => {
   const meshRef = useRef<THREE.Group>(null);
   const haloRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
+  const flareRef = useRef<THREE.Mesh>(null);
   
   const setFocusedTarget = useUniverse((s) => s.setFocusedTarget);
   const setCameraFocusPos = useUniverse((s) => s.setCameraFocusPos);
@@ -28,14 +29,15 @@ export const BirthdayStar: React.FC = () => {
 
   useFrame((state, delta) => {
     if (haloRef.current) {
-      const t = state.clock.getElapsedTime() * 2.5;
-      const pulse = Math.sin(t) * 0.25 + 1.15;
-      haloRef.current.scale.setScalar((hovered ? 1.6 : 1.1) * pulse);
+      const t = state.clock.getElapsedTime() * 2.8;
+      const pulse = Math.sin(t) * 0.2 + 1.15;
+      haloRef.current.scale.setScalar((hovered ? 1.5 : 1.1) * pulse);
     }
-
-    if (ringRef.current && holdProgress > 0) {
-      ringRef.current.rotation.z += delta * 5;
-      ringRef.current.scale.setScalar(1.2 + holdProgress * 1.8);
+    if (flareRef.current) {
+      flareRef.current.rotation.z += delta * 0.5;
+    }
+    if (ringRef.current) {
+      ringRef.current.rotation.z += delta * 1.5;
     }
   });
 
@@ -53,7 +55,7 @@ export const BirthdayStar: React.FC = () => {
     e.stopPropagation();
 
     let start = performance.now();
-    const duration = 1000;
+    const duration = 800;
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       try { navigator.vibrate(25); } catch {}
     }
@@ -82,7 +84,6 @@ export const BirthdayStar: React.FC = () => {
     }
   };
 
-  // Support instant click/tap as well so users who don't hold still get the modal
   const handleClick = (e: any) => {
     e.stopPropagation();
     openBirthdayModal();
@@ -99,65 +100,78 @@ export const BirthdayStar: React.FC = () => {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      {/* Central Radiant Gold Core */}
+      {/* 1. Brilliant Golden Star Core */}
       <mesh>
-        <sphereGeometry args={[0.7, 24, 24]} />
+        <sphereGeometry args={[0.55, 24, 24]} />
         <meshBasicMaterial color="#ffffff" toneMapped={false} />
       </mesh>
 
-      {/* Pulsing Golden Aura */}
+      {/* 2. Pulsing Golden Atmospheric Corona */}
       <mesh ref={haloRef}>
-        <sphereGeometry args={[1.5, 24, 24]} />
+        <sphereGeometry args={[1.3, 24, 24]} />
         <meshBasicMaterial
           color={goldColor}
           transparent
-          opacity={hovered ? 0.95 : 0.75}
+          opacity={hovered ? 0.95 : 0.65}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
         />
       </mesh>
 
-      {/* Radiant Golden Rings */}
-      <mesh ref={ringRef} rotation={[Math.PI / 3, Math.PI / 4, 0]}>
-        <ringGeometry args={[1.5, 2.0, 36]} />
+      {/* 3. Astronomical Star Flare */}
+      <mesh ref={flareRef}>
+        <planeGeometry args={[3.2, 3.2]} />
         <meshBasicMaterial
           color={goldColor}
           transparent
-          opacity={0.65}
+          opacity={hovered ? 0.85 : 0.45}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* 4. Delicate Starlight Ring */}
+      <mesh ref={ringRef} rotation={[Math.PI / 3, Math.PI / 4, 0]}>
+        <ringGeometry args={[1.2, 1.5, 36]} />
+        <meshBasicMaterial
+          color={goldColor}
+          transparent
+          opacity={0.5}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
-          toneMapped={false}
         />
       </mesh>
 
-      {/* Clear, Non-Suspending HTML Birthday Label */}
-      <Html
-        center
-        position={[0, 2.0, 0]}
-        distanceFactor={24}
-        zIndexRange={[10, 0]}
-        style={{
-          pointerEvents: 'none',
-          userSelect: 'none',
-          whiteSpace: 'nowrap',
-          color: '#ffd48a',
-          fontFamily: 'Caveat, cursive',
-          fontSize: '18px',
-          fontWeight: 700,
-          letterSpacing: '1px',
-          textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 16px rgba(255, 212, 138, 0.8)',
-          background: 'rgba(25, 18, 5, 0.75)',
-          padding: '3px 12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 212, 138, 0.6)',
-          transform: hovered ? 'scale(1.15)' : 'scale(1)',
-          transition: 'transform 0.2s ease',
-        }}
-      >
-        ✨ Pooja's Day (17 Nov)
-      </Html>
+      {/* 5. Minimal Birthday Label on Hover */}
+      {hovered && (
+        <Html
+          center
+          position={[0, 1.8, 0]}
+          distanceFactor={26}
+          zIndexRange={[10, 0]}
+          style={{
+            pointerEvents: 'none',
+            userSelect: 'none',
+            whiteSpace: 'nowrap',
+            color: '#ffd48a',
+            fontFamily: 'Caveat, cursive',
+            fontSize: '18px',
+            fontWeight: 700,
+            letterSpacing: '1px',
+            background: 'rgba(25, 18, 5, 0.85)',
+            backdropFilter: 'blur(10px)',
+            padding: '4px 12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 212, 138, 0.7)',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.6), 0 0 20px rgba(255, 212, 138, 0.5)',
+          }}
+        >
+          ✨ Pooja's Birthday Star (17 Nov)
+        </Html>
+      )}
     </group>
   );
 };

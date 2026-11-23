@@ -6,9 +6,9 @@ import { isMobileDevice } from '../utils/device';
 
 export const Starfield: React.FC = () => {
   const pointsRef = useRef<THREE.Points>(null);
-  const count = isMobileDevice() ? 1500 : 3500;
+  const count = isMobileDevice() ? 900 : 2500;
 
-  const positions = useMemo(() => generateBackgroundStars(count, 45, 110), [count]);
+  const positions = useMemo(() => generateBackgroundStars(count, 45, 120), [count]);
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -18,7 +18,7 @@ export const Starfield: React.FC = () => {
       new THREE.Color('#fff4e0'),
       new THREE.Color('#e0e7ff'),
       new THREE.Color('#ffd48a'),
-      new THREE.Color('#ff8fa3')
+      new THREE.Color('#ff8fa3'),
     ];
     for (let i = 0; i < count; i++) {
       const col = palette[Math.floor(Math.random() * palette.length)];
@@ -33,7 +33,7 @@ export const Starfield: React.FC = () => {
 
   useFrame((_, delta) => {
     if (pointsRef.current) {
-      pointsRef.current.rotation.y += delta * 0.004;
+      pointsRef.current.rotation.y += delta * 0.003;
       pointsRef.current.rotation.x += delta * 0.001;
     }
   });
@@ -41,11 +41,11 @@ export const Starfield: React.FC = () => {
   return (
     <points ref={pointsRef} geometry={geometry}>
       <pointsMaterial
-        size={0.55}
+        size={0.45}
         sizeAttenuation
         vertexColors
         transparent
-        opacity={0.85}
+        opacity={0.8}
         blending={THREE.AdditiveBlending}
         depthWrite={false}
       />

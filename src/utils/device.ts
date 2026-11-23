@@ -10,16 +10,18 @@ export const prefersReducedMotion = (): boolean => {
 
 export const getParticleBudget = (): number => {
   if (isMobileDevice()) {
-    return 12000;
+    return 6000; // Silky smooth 60 FPS on mobile GPUs
   }
-  return 38000;
+  return 18000; // Crisp, balanced performance on desktop
 };
 
 export const getDeviceDpr = (): [number, number] => {
   if (typeof window === 'undefined') return [1, 2];
   const isMobile = isMobileDevice();
   const dpr = window.devicePixelRatio || 1;
-  if (isMobile && dpr > 2) return [1, 1.5];
+  if (isMobile) {
+    return [1, Math.min(1.5, dpr)]; // Prevent mobile GPU overload from 3x retina
+  }
   return [1, Math.min(2, dpr)];
 };
 

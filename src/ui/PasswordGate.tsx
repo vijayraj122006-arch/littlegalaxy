@@ -15,7 +15,7 @@ export const PasswordGate: React.FC = () => {
 
   const handleDigit = (digit: string) => {
     if (pin.length < 8 && !isSuccess) {
-      audioSynth.playChime(440 + pin.length * 55);
+      // Keypad touch is completely silent as requested
       const newPin = pin + digit;
       setPin(newPin);
 
@@ -23,7 +23,6 @@ export const PasswordGate: React.FC = () => {
       if (newPin === '111126' || newPin === '11112026') {
         triggerSuccess();
       } else if (newPin.length >= PIN_LENGTH && newPin !== '111120') {
-        // If 6 digits and wrong (and not starting 111120...)
         triggerFailure();
       } else if (newPin.length === 8) {
         triggerFailure();
@@ -33,7 +32,6 @@ export const PasswordGate: React.FC = () => {
 
   const handleDelete = () => {
     if (pin.length > 0 && !isSuccess) {
-      audioSynth.playWhoosh();
       setPin((prev) => prev.slice(0, -1));
     }
   };
@@ -139,12 +137,12 @@ export const PasswordGate: React.FC = () => {
 
         <p style={{
           fontFamily: 'Plus Jakarta Sans, sans-serif',
-          fontSize: '13px',
-          color: '#c4b5fd',
+          fontSize: '14px',
+          color: '#fbcfe8',
           marginBottom: '28px',
           letterSpacing: '0.5px'
         }}>
-          Enter our special date (DDMMYY)
+          Enter the day I proposed to you ❤️
         </p>
 
         {/* Heart Type PIN Display */}
@@ -294,12 +292,12 @@ export const PasswordGate: React.FC = () => {
         {showHint && (
           <p style={{
             fontFamily: 'Caveat, cursive',
-            fontSize: '19px',
+            fontSize: '20px',
             color: '#ffd48a',
             marginTop: '24px',
             lineHeight: 1.3
           }}>
-            Hint: 11 / 11 / 26 ❤️
+            Hint: The day I proposed to you (11 / 11 / 2026) ❤️
           </p>
         )}
       </div>

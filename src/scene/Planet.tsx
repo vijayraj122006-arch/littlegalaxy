@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { PlanetDef } from '../content/planets';
 import { useUniverse } from '../store/useUniverse';
 import { audioSynth } from '../utils/audioSynth';
+import { Sparkles } from 'lucide-react';
 
 interface PlanetProps {
   planet: PlanetDef;
@@ -23,14 +25,15 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
 
   const color = new THREE.Color(planet.color);
   const glowColor = new THREE.Color(planet.glowColor);
+  const planetRadius = planet.size * 1.35; // increased size for clear visibility
 
   useFrame((_, delta) => {
     if (sphereRef.current) {
-      sphereRef.current.rotation.y += delta * 0.25;
+      sphereRef.current.rotation.y += delta * 0.3;
       sphereRef.current.rotation.x += delta * 0.05;
     }
     if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y -= delta * 0.15;
+      atmosphereRef.current.rotation.y -= delta * 0.2;
     }
   });
 
@@ -50,25 +53,25 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      {/* Planetary Body */}
+      {/* 3D Planet Core Sphere */}
       <mesh ref={sphereRef}>
-        <sphereGeometry args={[planet.size, 32, 32]} />
+        <sphereGeometry args={[planetRadius, 32, 32]} />
         <meshStandardMaterial
           color={color}
-          roughness={0.65}
-          metalness={0.2}
+          roughness={0.4}
+          metalness={0.15}
           emissive={color}
-          emissiveIntensity={hovered ? 0.35 : 0.15}
+          emissiveIntensity={hovered ? 0.65 : 0.4}
         />
       </mesh>
 
       {/* Atmospheric Glow Shell */}
       <mesh ref={atmosphereRef}>
-        <sphereGeometry args={[planet.size * 1.25, 32, 32]} />
+        <sphereGeometry args={[planetRadius * 1.25, 32, 32]} />
         <meshBasicMaterial
           color={glowColor}
           transparent
-          opacity={hovered ? 0.45 : (isVisited ? 0.35 : 0.22)}
+          opacity={hovered ? 0.55 : 0.35}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -76,26 +79,52 @@ export const Planet: React.FC<PlanetProps> = ({ planet }) => {
         />
       </mesh>
 
-      {/* Subtle Planetary Ring for visual delight */}
+      {/* Radiant Planetary Ring */}
       <mesh rotation={[Math.PI / 3, Math.PI / 6, 0]}>
-        <ringGeometry args={[planet.size * 1.4, planet.size * 1.85, 48]} />
+        <ringGeometry args={[planetRadius * 1.45, planetRadius * 2.1, 48]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.3}
+          opacity={0.45}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
 
-      {/* Subtle Marker Label or Visited Sparkle */}
-      {isVisited && (
-        <mesh position={[0, planet.size * 1.6, 0]}>
-          <octahedronGeometry args={[0.2, 0]} />
-          <meshBasicMaterial color="#ffffff" toneMapped={false} />
-        </mesh>
-      )}
+      {/* Floating 3D Label Tag */}
+      <Html
+        position={[0, planetRadius * 1.8, 0]}
+        center
+        distanceFactor={22}
+        style={{
+          pointerEvents: 'none',
+          userSelect: 'none',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          background: isVisited ? 'rgba(79, 214, 208, 0.45)' : 'rgba(13, 11, 46, 0.85)',
+          backdropFilter: 'blur(8px)',
+          border: `1px solid ${planet.glowColor}88`,
+          borderRadius: '18px',
+          padding: '5px 12px',
+          color: '#fff',
+          fontSize: '12px',
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          fontWeight: 600,
+          boxShadow: `0 0 20px ${planet.color}66`,
+          textShadow: '0 0 4px #000',
+          transform: hovered ? 'scale(1.12)' : 'scale(1)',
+          transition: 'transform 0.2s ease'
+        }}>
+          <Sparkles size={12} color={planet.color} />
+          <span>{planet.name}</span>
+        </div>
+      </Html>
     </group>
   );
 };

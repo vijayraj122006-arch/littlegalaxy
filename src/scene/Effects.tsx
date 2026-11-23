@@ -1,7 +1,6 @@
 import React from 'react';
-import { EffectComposer, Bloom, Vignette, Noise, ChromaticAberration } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
-import * as THREE from 'three';
 import { useUniverse } from '../store/useUniverse';
 import { prefersReducedMotion } from '../utils/device';
 
@@ -13,12 +12,12 @@ export const Effects: React.FC = () => {
     return (
       <EffectComposer multisampling={0}>
         <Bloom
-          luminanceThreshold={0.2}
-          luminanceSmoothing={0.8}
-          intensity={1.2}
+          luminanceThreshold={0.08}
+          luminanceSmoothing={0.7}
+          intensity={1.0}
           mipmapBlur
         />
-        <Vignette eskil={false} offset={0.15} darkness={0.85} />
+        <Vignette eskil={false} offset={0.5} darkness={0.35} />
       </EffectComposer>
     );
   }
@@ -26,25 +25,17 @@ export const Effects: React.FC = () => {
   return (
     <EffectComposer multisampling={0}>
       <Bloom
-        luminanceThreshold={0.15}
-        luminanceSmoothing={0.85}
-        intensity={1.6}
+        luminanceThreshold={0.08}
+        luminanceSmoothing={0.7}
+        intensity={1.3}
         mipmapBlur
       />
+      {/* Gentle soft edge vignette (never obscuring stars or planets) */}
       <Vignette
         eskil={false}
-        offset={0.2}
-        darkness={0.9}
+        offset={0.6}
+        darkness={0.35}
         blendFunction={BlendFunction.NORMAL}
-      />
-      <ChromaticAberration
-        offset={new THREE.Vector2(0.0012, 0.0012)}
-        radialModulation={true}
-        modulationOffset={0.65}
-      />
-      <Noise
-        opacity={0.035}
-        blendFunction={BlendFunction.OVERLAY}
       />
     </EffectComposer>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, Suspense, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { useUniverse } from './store/useUniverse';
 import { MEMORIES } from './content/memories';
@@ -37,18 +37,51 @@ import { Finale } from './ui/Finale';
 export const App: React.FC = () => {
   const [hasWebGL, setHasWebGL] = useState(true);
   const stage = useUniverse((s) => s.stage);
+  const audioOn = useUniverse((s) => s.audioOn);
+  const setAudioOn = useUniverse((s) => s.setAudioOn);
   const focusedTarget = useUniverse((s) => s.focusedTarget);
   const setFocusedTarget = useUniverse((s) => s.setFocusedTarget);
   const setCameraFocusPos = useUniverse((s) => s.setCameraFocusPos);
   const isWishPromptOpen = useUniverse((s) => s.isWishPromptOpen);
   const setLowQuality = useUniverse((s) => s.setLowQuality);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   // Check WebGL availability
   useEffect(() => {
     setHasWebGL(isWebGLAvailable());
   }, []);
 
-  // Performance FPS monitoring to degrade gracefully if needed
+  // Automatic audio play on first touch / click
+  useEffect(() => {
+    const handleStartAudio = () => {
+      if (audioRef.current && audioRef.current.paused) {
+        audioRef.current.play().then(() => {
+          setAudioOn(true);
+        }).catch(() => {});
+      }
+    };
+
+    window.addEventListener('pointerdown', handleStartAudio, { once: true });
+    window.addEventListener('keydown', handleStartAudio, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', handleStartAudio);
+      window.removeEventListener('keydown', handleStartAudio);
+    };
+  }, [setAudioOn]);
+
+  // Sync audio tag with store state
+  useEffect(() => {
+    if (audioRef.current) {
+      if (audioOn) {
+        audioRef.current.play().catch(() => {});
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [audioOn]);
+
+  // Performance FPS monitoring
   useEffect(() => {
     let frameCount = 0;
     let lastTime = performance.now();
@@ -60,7 +93,7 @@ export const App: React.FC = () => {
 
       if (now - lastTime >= 1000) {
         const fps = (frameCount * 1000) / (now - lastTime);
-        if (fps < 38) {
+        if (fps < 35) {
           lowFpsCount++;
           if (lowFpsCount >= 3) {
             setLowQuality(true);
@@ -101,9 +134,6 @@ export const App: React.FC = () => {
         <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '32px', color: '#fff4e0', marginBottom: '12px' }}>
           {FINALE_CONTENT.title}
         </h1>
-        <p style={{ fontSize: '13px', color: '#a5b4fc', marginBottom: '24px' }}>
-          (3D graphics not supported on this browser, but the message shines just as bright)
-        </p>
         <div style={{ maxWidth: '500px', textAlign: 'left', background: 'rgba(255,255,255,0.05)', padding: '24px', borderRadius: '18px' }}>
           {FINALE_CONTENT.paragraphs.map((p, i) => (
             <p key={i} style={{ marginBottom: '16px', lineHeight: 1.6, color: '#f1f5f9' }}>{p}</p>
@@ -116,7 +146,6 @@ export const App: React.FC = () => {
     );
   }
 
-  // Find active focused planet or memory
   const activeMemory = focusedTarget?.type === 'memory'
     ? MEMORIES.find((m) => m.id === focusedTarget.id)
     : null;
@@ -126,22 +155,33 @@ export const App: React.FC = () => {
     : null;
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', background: '#060719' }}>
+      {/* Background Audio Player (Mudhal Mazhai) */}
+      <audio
+        ref={audioRef}
+        src="/audio/ambient.mp3"
+        loop
+        preload="auto"
+      />
+
       {/* 3D WebGL Canvas */}
       <Canvas
-        camera={{ position: [0, 0, 4], fov: 60, near: 0.1, far: 1000 }}
+        camera={{ position: [0, 14, 32], fov: 60, near: 0.1, far: 1000 }}
         dpr={getDeviceDpr()}
         gl={{
-          antialias: false,
+          antialias: true,
           powerPreference: 'high-performance',
           stencil: false,
           depth: true
         }}
-        style={{ width: '100%', height: '100%', background: '#070817' }}
+        style={{ width: '100%', height: '100%', background: '#060719' }}
       >
         <Suspense fallback={null}>
-          <ambientLight intensity={0.5} />
-          <pointLight position={[0, 0, 0]} intensity={2.0} color="#ffd48a" distance={45} />
+          {/* Rich Scene Lighting (Guarantees visible, luminous 3D objects) */}
+          <ambientLight intensity={1.6} color="#fff8f0" />
+          <directionalLight position={[12, 20, 15]} intensity={1.8} color="#ffe5ec" />
+          <directionalLight position={[-15, -10, -10]} intensity={1.2} color="#a5b4fc" />
+          <pointLight position={[0, 0, 0]} intensity={3.5} color="#ffd48a" distance={80} />
           
           <CameraRig />
           <Nebula />
@@ -165,7 +205,7 @@ export const App: React.FC = () => {
           {/* Secret Easter Egg Hidden Star */}
           <HiddenStar />
 
-          {/* Shooting Stars & Finale Shower */}
+          {/* Shooting Stars */}
           <ShootingStar />
 
           {/* Post Processing Effects */}
@@ -199,9 +239,9 @@ export const App: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(7, 8, 23, 0.65)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
+            background: 'rgba(7, 8, 23, 0.72)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
             padding: '20px'
           }}
         >

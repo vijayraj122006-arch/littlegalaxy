@@ -1,9 +1,11 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { CONFIG } from '../content/config';
 import { useUniverse } from '../store/useUniverse';
 import { audioSynth } from '../utils/audioSynth';
+import { Gift } from 'lucide-react';
 
 export const BirthdayStar: React.FC = () => {
   const meshRef = useRef<THREE.Group>(null);
@@ -17,20 +19,19 @@ export const BirthdayStar: React.FC = () => {
   const [holdProgress, setHoldProgress] = useState(0);
   const holdTimerRef = useRef<number | null>(null);
 
-  // Check if today is 17 Nov
   const isBirthdayToday = useMemo(() => {
     const now = new Date();
     return now.getDate() === CONFIG.birthday.day && (now.getMonth() + 1) === CONFIG.birthday.month;
   }, []);
 
-  const starPosition: [number, number, number] = [3.2, 2.8, 3.5];
+  const starPosition: [number, number, number] = [3.5, 3.2, 4.0];
   const goldColor = '#ffd48a';
 
   useFrame((state, delta) => {
     if (haloRef.current) {
-      const t = state.clock.getElapsedTime() * (isBirthdayToday ? 3.5 : 2.0);
-      const pulse = Math.sin(t) * 0.25 + 1.1;
-      haloRef.current.scale.setScalar((hovered ? 1.5 : 1.0) * pulse * (isBirthdayToday ? 1.4 : 1.1));
+      const t = state.clock.getElapsedTime() * 2.5;
+      const pulse = Math.sin(t) * 0.25 + 1.15;
+      haloRef.current.scale.setScalar((hovered ? 1.6 : 1.1) * pulse);
     }
 
     if (ringRef.current && holdProgress > 0) {
@@ -42,7 +43,6 @@ export const BirthdayStar: React.FC = () => {
   const handlePointerDown = (e: any) => {
     e.stopPropagation();
 
-    // Hold-to-ignite for birthday star
     let start = performance.now();
     const duration = 1200;
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -89,19 +89,19 @@ export const BirthdayStar: React.FC = () => {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      {/* Central warm gold core */}
+      {/* Central Radiant Gold Core */}
       <mesh>
-        <sphereGeometry args={[0.42, 24, 24]} />
-        <meshBasicMaterial color="#fffbe6" toneMapped={false} />
+        <sphereGeometry args={[0.7, 24, 24]} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
       </mesh>
 
-      {/* Pulsing golden aura */}
+      {/* Pulsing Golden Aura */}
       <mesh ref={haloRef}>
-        <sphereGeometry args={[0.95, 24, 24]} />
+        <sphereGeometry args={[1.5, 24, 24]} />
         <meshBasicMaterial
           color={goldColor}
           transparent
-          opacity={isBirthdayToday ? 0.8 : 0.55}
+          opacity={isBirthdayToday ? 0.9 : 0.7}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
@@ -111,7 +111,7 @@ export const BirthdayStar: React.FC = () => {
       {/* Charging hold ring */}
       {holdProgress > 0 && (
         <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.8, 1.0, 32]} />
+          <ringGeometry args={[1.4, 1.8, 32]} />
           <meshBasicMaterial
             color="#fff4e0"
             transparent
@@ -122,6 +122,40 @@ export const BirthdayStar: React.FC = () => {
           />
         </mesh>
       )}
+
+      {/* Floating 3D Label Tag */}
+      <Html
+        position={[0, 1.8, 0]}
+        center
+        distanceFactor={22}
+        style={{
+          pointerEvents: 'none',
+          userSelect: 'none',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          background: 'rgba(255, 212, 138, 0.35)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255, 212, 138, 0.7)',
+          borderRadius: '18px',
+          padding: '5px 12px',
+          color: '#fff',
+          fontSize: '12px',
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          fontWeight: 600,
+          boxShadow: '0 0 20px rgba(255, 212, 138, 0.5)',
+          textShadow: '0 0 4px #000',
+          transform: hovered ? 'scale(1.12)' : 'scale(1)',
+          transition: 'transform 0.2s ease'
+        }}>
+          <Gift size={12} color="#ffd48a" />
+          <span>Birthday Star (17 Nov)</span>
+        </div>
+      </Html>
     </group>
   );
 };

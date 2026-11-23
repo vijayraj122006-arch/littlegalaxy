@@ -139,11 +139,11 @@ export const App: React.FC = () => {
         style={{ width: '100%', height: '100%', background: '#060719' }}
       >
         <Suspense fallback={null}>
-          {/* Rich Scene Lighting (Guarantees visible, luminous 3D objects) */}
-          <ambientLight intensity={1.6} color="#fff8f0" />
-          <directionalLight position={[12, 20, 15]} intensity={1.8} color="#ffe5ec" />
-          <directionalLight position={[-15, -10, -10]} intensity={1.2} color="#a5b4fc" />
-          <pointLight position={[0, 0, 0]} intensity={3.5} color="#ffd48a" distance={80} />
+          {/* Cinematic 3D Scene Lighting */}
+          <ambientLight intensity={0.9} color="#e2e8f0" />
+          <directionalLight position={[15, 25, 18]} intensity={1.4} color="#ffe5ec" />
+          <directionalLight position={[-18, -12, -14]} intensity={0.9} color="#818cf8" />
+          <pointLight position={[0, 1, 0]} intensity={1.1} color="#ffd48a" distance={60} decay={2} />
           
           <CameraRig />
           <Nebula />

@@ -41,7 +41,8 @@ export const Starfield: React.FC = () => {
   return (
     <points ref={pointsRef} geometry={geometry}>
       <pointsMaterial
-        size={0.8}
+        size={0.55}
+        sizeAttenuation
         vertexColors
         transparent
         opacity={0.85}

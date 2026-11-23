@@ -26,26 +26,36 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
   const holdTimerRef = useRef<number | null>(null);
 
   const color = new THREE.Color(memory.color);
-  const baseScale = isVisited ? 1.3 : 1.1;
+  const baseScale = isVisited ? 1.25 : 1.05;
 
   useFrame((state, delta) => {
     if (haloRef.current) {
       const t = state.clock.getElapsedTime() * 2.2 + memory.position[0];
-      const pulse = Math.sin(t) * 0.2 + 1.1;
-      haloRef.current.scale.setScalar((hovered ? 1.5 : 1.0) * pulse * baseScale);
+      const pulse = Math.sin(t) * 0.18 + 1.1;
+      haloRef.current.scale.setScalar((hovered ? 1.4 : 1.0) * pulse * baseScale);
     }
 
     if (ringRef.current) {
-      ringRef.current.rotation.z += delta * 1.5;
+      ringRef.current.rotation.z += delta * 1.2;
     }
   });
+
+  const triggerOpen = () => {
+    audioManager.playWhoosh();
+    audioManager.playChime(784);
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate([30, 50, 90]); } catch {}
+    }
+    setCameraFocusPos(memory.position);
+    setFocusedTarget({ type: 'memory', id: memory.id });
+  };
 
   const handlePointerDown = (e: any) => {
     e.stopPropagation();
 
     if (memory.interaction === 'hold' && !isVisited) {
       let start = performance.now();
-      const duration = 1200;
+      const duration = 1000;
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         try { navigator.vibrate(25); } catch {}
       }
@@ -60,20 +70,12 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
         } else {
           setHoldProgress(0);
           holdTimerRef.current = null;
-          audioManager.playWhoosh();
-          audioManager.playChime(880);
-          if (typeof navigator !== 'undefined' && navigator.vibrate) {
-            try { navigator.vibrate([30, 50, 90]); } catch {}
-          }
-          setCameraFocusPos(memory.position);
-          setFocusedTarget({ type: 'memory', id: memory.id });
+          triggerOpen();
         }
       };
       holdTimerRef.current = requestAnimationFrame(step);
     } else {
-      audioManager.playChime(659.25);
-      setCameraFocusPos(memory.position);
-      setFocusedTarget({ type: 'memory', id: memory.id });
+      triggerOpen();
     }
   };
 
@@ -95,9 +97,9 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      {/* Central Radiant Star Sphere */}
+      {/* Central Radiant White Star Core */}
       <mesh>
-        <sphereGeometry args={[0.55 * baseScale, 24, 24]} />
+        <sphereGeometry args={[0.5 * baseScale, 24, 24]} />
         <meshBasicMaterial
           color="#ffffff"
           toneMapped={false}
@@ -106,24 +108,24 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
 
       {/* Atmospheric Glowing Corona */}
       <mesh ref={haloRef}>
-        <sphereGeometry args={[1.25 * baseScale, 24, 24]} />
+        <sphereGeometry args={[1.15 * baseScale, 24, 24]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={isVisited ? 0.75 : (hovered ? 0.9 : 0.6)}
+          opacity={isVisited ? 0.7 : (hovered ? 0.85 : 0.5)}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
         />
       </mesh>
 
-      {/* Shimmering Star Ring */}
+      {/* Delicate Star Ring */}
       <mesh ref={ringRef} rotation={[Math.PI / 3, Math.PI / 4, 0]}>
-        <ringGeometry args={[1.15 * baseScale, 1.4 * baseScale, 32]} />
+        <ringGeometry args={[1.05 * baseScale, 1.25 * baseScale, 32]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.7}
+          opacity={0.6}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -134,7 +136,7 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
       {/* Charging hold ring */}
       {holdProgress > 0 && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.3, 1.7, 32]} />
+          <ringGeometry args={[1.2, 1.5, 32]} />
           <meshBasicMaterial
             color="#ffd48a"
             transparent
@@ -146,11 +148,11 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
         </mesh>
       )}
 
-      {/* Clear, Non-Suspending HTML Starlight Label */}
+      {/* Clean, Non-Suspending Frosted Starlight Badge */}
       <Html
         center
         position={[0, 1.6 * baseScale, 0]}
-        distanceFactor={24}
+        distanceFactor={28}
         zIndexRange={[10, 0]}
         style={{
           pointerEvents: 'none',
@@ -158,19 +160,22 @@ export const MemoryStar: React.FC<MemoryStarProps> = ({ memory }) => {
           whiteSpace: 'nowrap',
           color: '#ffffff',
           fontFamily: 'Plus Jakarta Sans, sans-serif',
-          fontSize: '13px',
+          fontSize: '12px',
           fontWeight: 600,
           letterSpacing: '0.5px',
-          textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6)',
-          background: 'rgba(7, 8, 23, 0.65)',
-          padding: '2px 8px',
-          borderRadius: '10px',
+          textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 10px rgba(255,255,255,0.6)',
+          background: 'rgba(8, 7, 24, 0.72)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          padding: '3px 10px',
+          borderRadius: '12px',
           border: `1px solid ${memory.color}88`,
+          boxShadow: `0 2px 10px rgba(0,0,0,0.5), 0 0 12px ${memory.color}22`,
           transform: hovered ? 'scale(1.15)' : 'scale(1)',
           transition: 'transform 0.2s ease',
         }}
       >
-        {memory.title}
+        ✨ {memory.title}
       </Html>
     </group>
   );

@@ -2,7 +2,7 @@ uniform float uTime;
 uniform vec3 uColorCore;
 uniform vec3 uColorMid;
 uniform vec3 uColorOuter;
-uniform float uTimeOfDay; // 0 = midnight, 0.5 = dawn/dusk, 1.0 = twilight
+uniform float uTimeOfDay;
 uniform float uOpacity;
 
 varying vec2 vUv;
@@ -74,35 +74,41 @@ float snoise(vec3 v) {
     return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
 }
 
-// Fractal Brownian Motion
+// Multi-octave fractal noise for ethereal cosmic gas
 float fbm(vec3 p) {
     float total = 0.0;
-    float amp = 0.55;
+    float amp = 0.5;
     float freq = 1.0;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) {
         total += snoise(p * freq) * amp;
-        freq *= 2.05;
-        amp *= 0.48;
+        freq *= 2.1;
+        amp *= 0.45;
     }
     return total;
 }
 
 void main() {
-    vec3 p = vPosition * 0.045;
-    float t = uTime * 0.02;
+    // Large scale cosmic clouds
+    vec3 p = vPosition * 0.018;
+    float t = uTime * 0.015;
 
-    float n1 = fbm(p + vec3(t * 0.5, -t * 0.3, t * 0.2));
-    float n2 = fbm(p * 1.5 - vec3(t * 0.4, t * 0.5, -t * 0.1) + n1 * 0.8);
+    float n1 = fbm(p + vec3(t * 0.4, -t * 0.2, t * 0.15));
+    float n2 = fbm(p * 1.8 - vec3(t * 0.25, t * 0.35, -t * 0.1) + n1 * 0.5);
 
-    float cloud = smoothstep(-0.25, 0.75, n2);
+    // Subtle cloud wisps (soft, graceful, cinematic)
+    float cloud = smoothstep(0.05, 0.75, n2);
     
-    // Time of day influence: warmer golden/peach at dusk, deeper violet/indigo at night
-    vec3 duskTint = vec3(0.98, 0.45, 0.65);
-    vec3 midColor = mix(uColorMid, duskTint, uTimeOfDay * 0.4);
+    // Deep interstellar dark palette
+    vec3 spaceDeep = vec3(0.02, 0.02, 0.06);   // deep void
+    vec3 cosmicViolet = vec3(0.12, 0.06, 0.24); // midnight violet dust
+    vec3 starlightRose = vec3(0.35, 0.12, 0.28); // gentle rose nebula wisp
+    vec3 starlightCyan = vec3(0.08, 0.22, 0.35); // faint ethereal cyan dust
 
-    vec3 col = mix(uColorOuter, midColor, smoothstep(0.1, 0.55, cloud));
-    col = mix(col, uColorCore, smoothstep(0.55, 0.95, cloud));
+    vec3 col = mix(spaceDeep, cosmicViolet, smoothstep(0.05, 0.4, cloud));
+    col = mix(col, starlightCyan, smoothstep(0.4, 0.7, cloud) * 0.6);
+    col = mix(col, starlightRose, smoothstep(0.6, 0.95, cloud) * 0.5);
 
-    float alpha = cloud * uOpacity * 0.65;
+    // Soft opacity so stars pop in 3D
+    float alpha = cloud * uOpacity * 0.28;
     gl_FragColor = vec4(col, alpha);
 }

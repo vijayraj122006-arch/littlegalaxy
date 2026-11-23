@@ -23,7 +23,7 @@ export const BirthdayStar: React.FC = () => {
     return now.getDate() === CONFIG.birthday.day && (now.getMonth() + 1) === CONFIG.birthday.month;
   }, []);
 
-  const starPosition: [number, number, number] = [3.5, 3.2, 4.0];
+  const starPosition: [number, number, number] = [10, 4.0, -7];
   const goldColor = '#ffd48a';
 
   useFrame((state, delta) => {

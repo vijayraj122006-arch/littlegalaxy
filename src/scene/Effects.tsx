@@ -32,15 +32,15 @@ export const Effects: React.FC = () => {
     <PostprocessingErrorBoundary>
       <EffectComposer multisampling={0}>
         <Bloom
-          luminanceThreshold={0.12}
-          luminanceSmoothing={0.6}
-          intensity={isLowQuality || reducedMotion ? 0.9 : 1.25}
+          luminanceThreshold={0.4}
+          luminanceSmoothing={0.3}
+          intensity={isLowQuality || reducedMotion ? 0.6 : 0.85}
           mipmapBlur
         />
         <Vignette
           eskil={false}
-          offset={0.6}
-          darkness={0.3}
+          offset={0.55}
+          darkness={0.35}
           blendFunction={BlendFunction.NORMAL}
         />
       </EffectComposer>
